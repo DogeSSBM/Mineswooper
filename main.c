@@ -47,6 +47,7 @@ void placeBombOffset(Tile **tile, const Length len, const Coord firstClick, cons
                 if(tile[x][y].isBomb || (x == firstClick.x && y == firstClick.y))
                     continue;
                 tile[x][y].isBomb = true;
+                return;
             }
             cur += !tile[x][y].isBomb;
         }
@@ -68,6 +69,30 @@ void placeBombs(Tile **tile, const Length len, const Coord firstClick, const uin
     }
 }
 
+bool validTilePos(const Coord pos, const Length len)
+{
+    return pos.x >= 0 && pos.y >= 0 && pos.x < len.x && pos.y < len.y;
+}
+
+void getNums(Tile **tile, const Length len)
+{
+    for(int y = 0; y < len.y; y++){
+        for(int x = 0; x < len.x; x++){
+            if(tile[x][y].isBomb)
+                continue;
+            const Coord pos = {.x = x, .y = y};
+            for(int yo = -1; yo <= 1; yo++){
+                for(int xo = -1; xo <= 1; xo++){
+                    const Coord adj = {.x = x+xo, .y = y+yo};
+                    if(coordSame(pos, adj) || !validTilePos(adj, len))
+                        continue;
+                    tile[x][y].num += tile[adj.x][adj.y].isBomb;
+                }
+            }
+        }
+    }
+}
+
 Board boardInit(const Length len, const Coord firstClick, const uint numBombs)
 {
     Board ret = {
@@ -80,6 +105,7 @@ Board boardInit(const Length len, const Coord firstClick, const uint numBombs)
         ret.tile[x] = calloc(len.y, sizeof(Tile));
 
     placeBombs(ret.tile, len, firstClick, numBombs);
+    getNums(ret.tile, len);
     return ret;
 }
 
@@ -92,11 +118,6 @@ uint parseUint(char *str)
         exit(EXIT_FAILURE);
     }
     return ret;
-}
-
-bool validTilePos(const Coord pos, const Length len)
-{
-    return pos.x >= 0 && pos.y >= 0 && pos.x < len.x && pos.y < len.y;
 }
 
 void drawBoard(const Board board)
@@ -115,6 +136,21 @@ void drawBoard(const Board board)
             }
         }
     }
+}
+
+void printBoard(const Board board)
+{
+    for(uint y = 0; y < board.len.y; y++){
+        for(uint x = 0; x < board.len.x; x++){
+            if(board.tile[x][y].isBomb)
+                putchar('B');
+            else
+                putchar('0'+board.tile[x][y].num);
+            putchar(' ');
+        }
+        putchar('\n');
+    }
+    putchar('\n');
 }
 
 int main(int argc, char **argv)
@@ -138,6 +174,7 @@ int main(int argc, char **argv)
             break;
     }
 
+    printf("%ux%u - %u\n", len.x, len.y, bombs);
     Length window = {800, 600};
     init();
     setWindowLen(window);
@@ -153,6 +190,7 @@ int main(int argc, char **argv)
             if(firstClick){
                 if(validTilePos(tilePos, len)){
                     board = boardInit(len, tilePos, bombs);
+                    printBoard(board);
                 }
             }else{
 
