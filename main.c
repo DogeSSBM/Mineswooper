@@ -1,6 +1,7 @@
 #include "Includes.h"
 
 typedef enum{D_NONE, D_FLAG, D_QUEST, D_N}Decal;
+const char DecalChar[D_N] = {'N', 'F', 'Q'};
 typedef struct{
     bool isBomb;
     bool clear;
@@ -163,6 +164,7 @@ void drawBoard(const Board board)
         {0x00, 0x00, 0x00, 0xFF},
         {0x52, 0x52, 0x52, 0xFF},
     };
+    setTextSize(board.scale);
 
     for(uint y = 0; y < board.len.y; y++){
         for(uint x = 0; x < board.len.x; x++){
@@ -173,18 +175,40 @@ void drawBoard(const Board board)
                 setColor(GREY3);
                 fillSquareCoordResize(pos, board.scale, -1);
                 if(board.tile[x][y].num > 0 && board.tile[x][y].num < 9){
-                    setTextSize(board.scale);
                     setTextColor(numColor[board.tile[x][y].num-1]);
                     char txt[2] = "0";
                     txt[0] = '0'+board.tile[x][y].num;
-                    drawTextCenteredCoord(
-                        txt,
-                        coordOffset(pos, (const Coord){.x=board.scale/2,.y=board.scale/2})
-                    );
+                    drawTextCenteredCoord(txt,coordOffset(pos, (const Coord){.x=board.scale/2,.y=board.scale/2}));
                 }
             }else{
                 setColor(GREY1);
                 fillSquareCoordResize(pos, board.scale, -1);
+                setColor(GREY2);
+                fillSquareCoordResize(pos, board.scale, -1 -(board.scale/8));
+                if(board.tile[x][y].decal == D_FLAG){
+                    const uint t1 = board.scale/3;
+                    const uint t2 = t1*2;
+                    const uint n1 = t1/3;
+                    const uint n2 = n1*2;
+
+                    setColor(BLACK);
+                    const Coord p1 = coordShift(coordShift(pos, DIR_R, t1+n1), DIR_D, n1);
+                    const Coord p2 = coordShift(coordShift(pos, DIR_R, t1+n2), DIR_D, t2+n1);
+                    fillRectCoords(p1, p2);
+                    const Coord b1 = coordShift(coordShift(pos, DIR_R, t1), DIR_D, t2+n1);
+                    const Coord b2 = coordShift(coordShift(pos, DIR_R, t2), DIR_D, t2+n2);
+                    fillRectCoords(b1, b2);
+                    setColor(RED);
+                    Coord f[3] = {
+                        coordShift(p1, DIR_R, n1),
+                        coordShift(coordShift(p1, DIR_R, t1+n1), DIR_D, n2),
+                        coordShift(coordShift(p1, DIR_R, n1), DIR_D, t1+n1)
+                    };
+                    fillPoly(f, 3);
+                }else if(board.tile[x][y].decal == D_QUEST){
+                    setTextColor(BLACK);
+                    drawTextCenteredCoord("?",coordOffset(pos, (const Coord){.x=board.scale/2,.y=board.scale/2}));
+                }
             }
         }
     }
@@ -209,19 +233,22 @@ Board prop(Board board, const Coord pos)
 {
     if(!validTilePos(pos, board.len) || board.tile[pos.x][pos.y].isBomb)
         return board;
+
     board.tile[pos.x][pos.y].clear = true;
     if(board.tile[pos.x][pos.y].num)
         return board;
-    for(Direction d = 0; d < 4; d++){
-        const Coord adj = coordShift(pos, d, 1);
-        if(validTilePos(adj, board.len)){
+
+    printf("(%i,%i) -\n", pos.x, pos.y);
+    for(int yo = -1; yo <= 1; yo++){
+        for(int xo = -1; xo <= 1; xo++){
+            const Coord adj = {.x = pos.x+xo, .y = pos.y+yo};
+            if(coordSame(pos, adj) || !validTilePos(adj, board.len) || board.tile[adj.x][adj.y].clear)
+                continue;
+            printf("\t(%i,%i)\n", adj.x, adj.y);
             board = prop(board, adj);
         }
-        const Coord dag = coordShift(dag, dirROR(d), 1);
-        if(validTilePos(dag, board.len)){
-            board = prop(board, dag);
-        }
     }
+
     return board;
 }
 
@@ -283,7 +310,7 @@ int main(int argc, char **argv)
     Length window = {800, 600};
     init();
     setWindowLen(window);
-
+    window = maximizeWindow();
     bool firstClick = true;
     Board board = boardInit(len);
     while(1){
@@ -291,7 +318,7 @@ int main(int argc, char **argv)
 
         if(mouseBtnPressed(MOUSE_L)){
             const Coord tilePos = coordDiv(mouse.pos, board.scale);
-            printf("Lm:(%2i,%2i)[%2i,%2i]\n", mouse.pos.x, mouse.pos.y, tilePos.x, tilePos.y);
+            printf("M_L - (%3i,%3i)[%2i,%2i]\n", mouse.pos.x, mouse.pos.y, tilePos.x, tilePos.y);
             if(validTilePos(tilePos, board.len)){
                 if(firstClick){
                     board = boardFirstClick(board, tilePos, bombs);
@@ -311,6 +338,14 @@ int main(int argc, char **argv)
             if(validTilePos(tilePos, board.len)){
                 board.tile[tilePos.x][tilePos.y].decal++;
                 board.tile[tilePos.x][tilePos.y].decal %= D_N;
+                printf(
+                    "M_R - (%3i,%3i)[%2i,%2i]: %c\n",
+                    mouse.pos.x,
+                    mouse.pos.y,
+                    tilePos.x,
+                    tilePos.y,
+                    DecalChar[board.tile[tilePos.x][tilePos.y].decal]
+                );
             }
         }
 
