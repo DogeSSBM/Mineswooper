@@ -102,7 +102,7 @@ void placeBombs(Tile **tile, const Length len, const Coord firstClick, const uin
     uint i = 0;
     for(int yo = -1; yo <= 1; yo++){
         for(int xo = -1; xo <= 1; xo++){
-            res[i] = (const Coord){.x = wrap(pos.x+xo, 0, len.x), .y = wrap(pos.y+yo, 0, len.y)};
+            res[i] = (const Coord){.x = pos.x+xo, .y = pos.y+yo};
             i++;
         }
     }
@@ -353,14 +353,19 @@ int main(int argc, char **argv)
     bool firstClick = true;
     Board board = boardInit(len);
 
-    // Coord down[2] = {}
+    Coord down[2] = {0};
 
     while(1){
         Ticks t = frameStart();
 
+        if(mouseBtnPressed(MOUSE_L))
+            down[0] = coordDiv(mouse.pos, board.scale);
 
-        if(mouseBtnReleased(MOUSE_L)){
-            const Coord tilePos = coordDiv(mouse.pos, board.scale);
+        if(mouseBtnPressed(MOUSE_R))
+            down[1] = coordDiv(mouse.pos, board.scale);
+
+        Coord tilePos;
+        if(mouseBtnReleased(MOUSE_L) && coordSame(down[0], (tilePos = coordDiv(mouse.pos, board.scale)))){
             printf("M_L - (%3i,%3i)[%2i,%2i]\n", mouse.pos.x, mouse.pos.y, tilePos.x, tilePos.y);
             if(validTilePos(tilePos, board.len)){
                 if(firstClick){
@@ -394,6 +399,7 @@ int main(int argc, char **argv)
 
         const Length newWindow = getWindowLen();
         if(!coordSame(newWindow, window)){
+            window = newWindow;
             board.scale = scale(board.len);
         }
 
