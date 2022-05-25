@@ -14,9 +14,6 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
 #include <SDL2/SDL2_gfxPrimitives.h>
-#include <SDL2/SDL_image.h>
-#include <SDL2/SDL_net.h>
-#include <SDL2/SDL_mixer.h>
 
 #include "Types.h"
 #include "Coords.h"
@@ -26,7 +23,6 @@
 #include "Timing.h"
 #include "Graphics.h"
 #include "Text.h"
-#include "Image.h"
 #include "Input.h"
 #include "Events.h"
 #include "File.h"

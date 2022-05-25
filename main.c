@@ -33,46 +33,85 @@ uint scale(const Length len)
     return imin(win.x/len.x, win.y/len.y);
 }
 
+bool validTilePos(const Coord pos, const Length len)
+{
+    return pos.x >= 0 && pos.y >= 0 && pos.x < len.x && pos.y < len.y;
+}
+
 void resetTiles(Tile **tile, const Length len)
 {
     for(uint x = 0; x < len.x; x++)
         memset(tile[x], 0, sizeof(Tile)*len.y);
 }
 
-void placeBombOffset(Tile **tile, const Length len, const Coord firstClick, const uint off)
+bool isReserved(const Coord pos, Coord res[9])
+{
+    for(uint i = 0; i < 9; i++)
+        if(coordSame(res[i], pos))
+            return true;
+
+    return false;
+}
+
+uint bombsBefore(Tile **tile, const Length len, const Coord pos)
+{
+    uint total = 0;
+    for(uint y = 0; y < len.y; y++)
+        for(uint x = 0; x < len.x; x++)
+            total+=tile[x][y].isBomb;
+
+    return total;
+}
+
+void placeBombOffset(Tile **tile, const Length len, Coord res[9], const uint off)
 {
     uint cur = 0;
     for(uint y = 0; y < len.y; y++){
         for(uint x = 0; x < len.x; x++){
-            if(cur == off){
-                if(tile[x][y].isBomb || (x == firstClick.x && y == firstClick.y))
-                    continue;
+            const Coord pos = {.x = x, .y = y};
+            if(cur >= off && !(tile[x][y].isBomb || isReserved(pos, res))){
                 tile[x][y].isBomb = true;
                 return;
             }
-            cur += !tile[x][y].isBomb;
+            cur += !tile[x][y].isBomb && !isReserved(pos, res);
         }
     }
-
 }
 
 void placeBombs(Tile **tile, const Length len, const Coord firstClick, const uint numBombs)
 {
-    if(len.x*len.y < numBombs+1){
+    if(!validTilePos(firstClick, len)){
+        fprintf(stderr, "Invalid firstClick: (%2i,%2i)!\n", firstClick.x, firstClick.y);
+        exit(EXIT_FAILURE);
+    }
+    if(len.x*len.y < numBombs+9){
         fprintf(stderr, "Can't fit %u bombs in %ix%i (%i) tiles!\n", numBombs, len.x, len.y, len.x*len.y);
         exit(EXIT_FAILURE);
     }
 
-    uint freeTiles = len.x*len.y;
+    Coord pos = {.x = firstClick.x, .y = firstClick.y};
+    for(Direction d = 0; d < 4; d++){
+        const Coord card = coordShift(pos, d, 1);
+        if(!validTilePos(card, len)){
+            d = 0;
+            pos = coordShift(pos, dirINV(d), 1);
+        }
+    }
+
+    Coord res[9];
+    uint i = 0;
+    for(int yo = -1; yo <= 1; yo++){
+        for(int xo = -1; xo <= 1; xo++){
+            res[i] = (const Coord){.x = wrap(pos.x+xo, 0, len.x), .y = wrap(pos.y+yo, 0, len.y)};
+            i++;
+        }
+    }
+
+    uint freeTiles = len.x*len.y - 9;
     for(uint i = 0; i < numBombs; i++){
-        placeBombOffset(tile, len, firstClick, rand()%freeTiles);
+        placeBombOffset(tile, len, res, rand()%freeTiles);
         freeTiles--;
     }
-}
-
-bool validTilePos(const Coord pos, const Length len)
-{
-    return pos.x >= 0 && pos.y >= 0 && pos.x < len.x && pos.y < len.y;
 }
 
 void getNums(Tile **tile, const Length len)
@@ -313,10 +352,14 @@ int main(int argc, char **argv)
     window = maximizeWindow();
     bool firstClick = true;
     Board board = boardInit(len);
+
+    // Coord down[2] = {}
+
     while(1){
         Ticks t = frameStart();
 
-        if(mouseBtnPressed(MOUSE_L)){
+
+        if(mouseBtnReleased(MOUSE_L)){
             const Coord tilePos = coordDiv(mouse.pos, board.scale);
             printf("M_L - (%3i,%3i)[%2i,%2i]\n", mouse.pos.x, mouse.pos.y, tilePos.x, tilePos.y);
             if(validTilePos(tilePos, board.len)){
@@ -333,7 +376,7 @@ int main(int argc, char **argv)
                 }
             }
         }
-        if(mouseBtnPressed(MOUSE_R)){
+        if(mouseBtnReleased(MOUSE_R)){
             const Coord tilePos = coordDiv(mouse.pos, board.scale);
             if(validTilePos(tilePos, board.len)){
                 board.tile[tilePos.x][tilePos.y].decal++;
