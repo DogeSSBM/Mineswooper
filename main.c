@@ -14,6 +14,7 @@ typedef struct{
     uint numBombs;
     uint tilesLeft;
     uint scale;
+    bool firstClick;
     Tile **tile;
 }Board;
 
@@ -162,7 +163,8 @@ Board boardInit(const Length len)
         .len = len,
         .scale = scale(len),
         .numBombs = 0,
-        .tile = calloc(len.x, sizeof(Tile*))
+        .firstClick = true,
+        .tile = calloc(len.x, sizeof(Tile*)),
     };
     for(uint x = 0; x < len.x; x++)
         ret.tile[x] = calloc(len.y, sizeof(Tile));
@@ -171,8 +173,13 @@ Board boardInit(const Length len)
 
 Board boardFirstClick(Board board, const Coord firstClick, const uint numBombs)
 {
+    if(!board.firstClick){
+        fprintf(stderr, "Error. Called boardFirstClick when board.firstClick == true\n");
+        exit(EXIT_FAILURE);
+    }
     board = boardFree(board);
     board = boardInit(board.len);
+    board.firstClick = false;
     board.numBombs = numBombs;
     placeBombs(board.tile, board.len, firstClick, numBombs);
     board.tilesLeft = numTilesLeft(board.tile, board.len, numBombs);
@@ -277,13 +284,13 @@ Board prop(Board board, const Coord pos)
     if(board.tile[pos.x][pos.y].num)
         return board;
 
-    printf("(%i,%i) -\n", pos.x, pos.y);
+    // printf("(%i,%i) -\n", pos.x, pos.y);
     for(int yo = -1; yo <= 1; yo++){
         for(int xo = -1; xo <= 1; xo++){
             const Coord adj = {.x = pos.x+xo, .y = pos.y+yo};
             if(coordSame(pos, adj) || !validTilePos(adj, board.len) || board.tile[adj.x][adj.y].clear)
                 continue;
-            printf("\t(%i,%i)\n", adj.x, adj.y);
+            // printf("\t(%i,%i)\n", adj.x, adj.y);
             board = prop(board, adj);
         }
     }
@@ -350,7 +357,6 @@ int main(int argc, char **argv)
     init();
     setWindowLen(window);
     window = maximizeWindow();
-    bool firstClick = true;
     Board board = boardInit(len);
 
     Coord down[2] = {0};
@@ -366,12 +372,13 @@ int main(int argc, char **argv)
 
         Coord tilePos;
         if(mouseBtnReleased(MOUSE_L) && coordSame(down[0], (tilePos = coordDiv(mouse.pos, board.scale)))){
-            printf("M_L - (%3i,%3i)[%2i,%2i]\n", mouse.pos.x, mouse.pos.y, tilePos.x, tilePos.y);
+            // printf("M_L - (%3i,%3i)[%2i,%2i]\n", mouse.pos.x, mouse.pos.y, tilePos.x, tilePos.y);
             if(validTilePos(tilePos, board.len)){
-                if(firstClick){
+                if(board.firstClick){
+
                     board = boardFirstClick(board, tilePos, bombs);
+
                     // printBoard(board);
-                    firstClick = false;
                     board = prop(board, tilePos);
                 }else{
                     if(board.tile[tilePos.x][tilePos.y].isBomb)
@@ -386,14 +393,14 @@ int main(int argc, char **argv)
             if(validTilePos(tilePos, board.len)){
                 board.tile[tilePos.x][tilePos.y].decal++;
                 board.tile[tilePos.x][tilePos.y].decal %= D_N;
-                printf(
-                    "M_R - (%3i,%3i)[%2i,%2i]: %c\n",
-                    mouse.pos.x,
-                    mouse.pos.y,
-                    tilePos.x,
-                    tilePos.y,
-                    DecalChar[board.tile[tilePos.x][tilePos.y].decal]
-                );
+                // printf(
+                //     "M_R - (%3i,%3i)[%2i,%2i]: %c\n",
+                //     mouse.pos.x,
+                //     mouse.pos.y,
+                //     tilePos.x,
+                //     tilePos.y,
+                //     DecalChar[board.tile[tilePos.x][tilePos.y].decal]
+                // );
             }
         }
 
