@@ -10,10 +10,12 @@
 #include <complex.h>
 #include <math.h>
 #include <tgmath.h>
+#include <assert.h>
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
 #include <SDL2/SDL2_gfxPrimitives.h>
+#include <SDL2/SDL_image.h>
 
 #include "Types.h"
 #include "Coords.h"
@@ -23,10 +25,10 @@
 #include "Timing.h"
 #include "Graphics.h"
 #include "Text.h"
+#include "Image.h"
 #include "Input.h"
 #include "Events.h"
 #include "File.h"
-#include "Menu.h"
 #include "DogeUtil.h"
 #include "Poly.h"
 #include "Examples.h"
