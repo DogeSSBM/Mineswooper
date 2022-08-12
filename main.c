@@ -331,6 +331,21 @@ void loose(Board board, const Coord bombClicked)
     }
 }
 
+
+
+bool solvable(const Board original)
+{
+    Board board = original;
+    board.tile = calloc(board.len.x, sizeof(Tile*));
+    for(uint x = 0; x < board.len.x; x++){
+        board.tile[x] = calloc(board.len.y, sizeof(Tile));
+        memcpy(board.tile[x], original.tile[x], sizeof(Tile)*board.len.y);
+    }
+
+
+    return true;
+}
+
 int main(int argc, char **argv)
 {
     Length len = {.x = 30, .y = 16};
@@ -393,14 +408,6 @@ int main(int argc, char **argv)
             if(validTilePos(tilePos, board.len)){
                 board.tile[tilePos.x][tilePos.y].decal++;
                 board.tile[tilePos.x][tilePos.y].decal %= D_N;
-                // printf(
-                //     "M_R - (%3i,%3i)[%2i,%2i]: %c\n",
-                //     mouse.pos.x,
-                //     mouse.pos.y,
-                //     tilePos.x,
-                //     tilePos.y,
-                //     DecalChar[board.tile[tilePos.x][tilePos.y].decal]
-                // );
             }
         }
 
