@@ -320,7 +320,20 @@ bool solvable(const Board original)
         memcpy(board.tile[x], original.tile[x], sizeof(Tile)*board.len.y);
     }
 
+    bool progress = false;
+    do{
+        for(int y = 0; y < board.len.y; y++){
+            for(int x = 0; x < board.len.x; x++){
 
+            }
+        }
+    }while(progress);
+
+
+    printBoard(original);
+    printBoard(board);
+
+    boardFree(board);
     return true;
 }
 
@@ -368,14 +381,25 @@ int main(int argc, char **argv)
                 if(board.firstClick){
 
                     board = boardFirstClick(board, tilePos, bombs);
-
-                    // printBoard(board);
+                    const uint before = board.tilesLeft;
                     board = prop(board, tilePos);
+                    board.tilesLeft = numTilesLeft(board.tile, board.len, board.numBombs);
+                    printf(
+                        "Before: %u, After: %u, Cleared: %u\n",
+                        before, board.tilesLeft, before - board.tilesLeft
+                    );
                 }else{
                     if(board.tile[tilePos.x][tilePos.y].isBomb)
                         loose(board, tilePos);
-                    if(!board.tile[tilePos.x][tilePos.y].clear)
+                    if(!board.tile[tilePos.x][tilePos.y].clear){
+                        const uint before = board.tilesLeft;
                         board = prop(board, tilePos);
+                        board.tilesLeft = numTilesLeft(board.tile, board.len, board.numBombs);
+                        printf(
+                            "Before: %u, After: %u, Cleared: %u\n",
+                            before, board.tilesLeft, before - board.tilesLeft
+                        );
+                    }
                 }
             }
         }
