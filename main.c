@@ -1,7 +1,7 @@
 #include "DogeLib/Includes.h"
 
 typedef enum{D_NONE, D_FLAG, D_QUEST, D_N}Decal;
-const char DecalChar[D_N] = {'N', 'F', 'Q'};
+const char DecalChar[D_N] = {'#', '>', '?'};
 typedef struct{
     bool isBomb;
     bool clear;
@@ -137,33 +137,41 @@ Board boardFree(Board board)
     return board;
 }
 
-Board boardInit(const Length len)
+Board boardInit(const Length len, const uint bombs)
 {
     Board ret = {
         .len = len,
         .scale = scale(len),
-        .numBombs = 0,
+        .numBombs = bombs,
         .firstClick = true,
         .tile = calloc(len.x, sizeof(Tile*)),
+        .tilesLeft = len.x*len.y - bombs
     };
     for(int x = 0; x < len.x; x++)
         ret.tile[x] = calloc(len.y, sizeof(Tile));
     return ret;
 }
 
+Board prop(Board, const Coord);
+bool solvable(const Board);
 Board boardFirstClick(Board board, const Coord firstClick, const uint numBombs)
 {
     if(!board.firstClick){
         fprintf(stderr, "Error. Called boardFirstClick when board.firstClick == true\n");
         exit(EXIT_FAILURE);
     }
-    board = boardFree(board);
-    board = boardInit(board.len);
-    board.firstClick = false;
-    board.numBombs = numBombs;
-    placeBombs(board.tile, board.len, firstClick, numBombs);
-    board.tilesLeft = numTilesLeft(board.tile, board.len, numBombs);
-    getNums(board.tile, board.len);
+    ull tries = 0;
+    do{
+        board = boardFree(board);
+        board = boardInit(board.len, numBombs);
+        board.firstClick = false;
+        placeBombs(board.tile, board.len, firstClick, numBombs);
+        getNums(board.tile, board.len);
+        board = prop(board, firstClick);
+        board.tilesLeft = numTilesLeft(board.tile, board.len, numBombs);
+        tries++;
+    }while(!solvable(board));
+    printf("Generated solvable configuration after %llu tries\n", tries);
     return board;
 }
 
@@ -255,6 +263,21 @@ void printBoard(const Board board)
     putchar('\n');
 }
 
+void printDecals(const Board board)
+{
+    for(int y = 0; y < board.len.y; y++){
+        for(int x = 0; x < board.len.x; x++){
+            if(board.tile[x][y].clear)
+                putchar(board.tile[x][y].num ? '0'+board.tile[x][y].num : '-');
+            else
+                putchar(DecalChar[board.tile[x][y].decal]);
+            putchar(' ');
+        }
+        putchar('\n');
+    }
+    putchar('\n');
+}
+
 Board prop(Board board, const Coord pos)
 {
     if(!validTilePos(pos, board.len) || board.tile[pos.x][pos.y].isBomb)
@@ -278,8 +301,10 @@ Board prop(Board board, const Coord pos)
     return board;
 }
 
-void loose(Board board, const Coord bombClicked)
+void endGame(Board board, const Coord bombClicked, const bool win)
 {
+    const char *text = win ? " You win! " : " You loose! ";
+    const Color textColor = win ? BLUE : RED;
     Length window = getWindowLen();
     while(1){
         const uint t = frameStart();
@@ -290,25 +315,76 @@ void loose(Board board, const Coord bombClicked)
         }
 
         drawBoard(board);
-        const Coord pos = coordMul((const Coord){.x=bombClicked.x, .y=bombClicked.y}, board.scale);
-        setColor((const Color){.r = 255, .g = 128, .b = 0, .a = 255});
-        fillSquareCoordResize(pos, board.scale, -1);
+        if(!win){
+            const Coord pos = coordMul((const Coord){.x=bombClicked.x, .y=bombClicked.y}, board.scale);
+            setColor((const Color){.r = 255, .g = 128, .b = 0, .a = 255});
+            fillSquareCoordResize(pos, board.scale, -1);
+        }
 
         setTextSize(board.scale);
         setColor(WHITE);
-        const Length tlen = getTextLength(" You loose! ");
+        const Length tlen = getTextLength(text);
         fillRectCoordLength(coordOffset(getWindowMid(), coordDiv(tlen, -2)), tlen);
         setColor(BLACK);
         fillBorderCoords(coordOffset(getWindowMid(), coordDiv(tlen, -2)), tlen, board.scale/4);
 
-        setTextColor(RED);
-        drawTextCenteredCoord(" You loose! ", getWindowMid());
+        setTextColor(textColor);
+        drawTextCenteredCoord(text, getWindowMid());
         if(keyPressed(SDL_SCANCODE_ESCAPE)){
             boardFree(board);
             exit(0);
         }
         frameEnd(t);
     }
+}
+
+uint adjDecal(Board *board, const Coord pos, const Decal decal)
+{
+    uint ret = 0;
+    for(int yo = -1; yo <= 1; yo++){
+        for(int xo = -1; xo <= 1; xo++){
+            const Coord adj = iC(pos.x+xo, pos.y+yo);
+            if(coordSame(pos, adj) || !validTilePos(adj, board->len))
+                continue;
+            ret += !board->tile[adj.x][adj.y].clear && board->tile[adj.x][adj.y].decal == decal;
+        }
+    }
+    return ret;
+}
+
+uint flagAdj(Board *board, const Coord pos)
+{
+    const uint unflagged = adjDecal(board, pos, D_NONE);
+    if(unflagged != board->tile[pos.x][pos.y].num - adjDecal(board, pos, D_FLAG))
+        return 0;
+    for(int yo = -1; yo <= 1; yo++){
+        for(int xo = -1; xo <= 1; xo++){
+            const Coord adj = iC(pos.x+xo, pos.y+yo);
+            if(coordSame(pos, adj) || !validTilePos(adj, board->len))
+                continue;
+            board->tile[adj.x][adj.y].decal = D_FLAG;
+        }
+    }
+    return unflagged;
+}
+
+uint clearAdj(Board *board, const Coord pos)
+{
+    if(adjDecal(board, pos, D_FLAG) != board->tile[pos.x][pos.y].num)
+        return 0;
+    board->tilesLeft = numTilesLeft(board->tile, board->len, board->numBombs);
+    const uint before = board->tilesLeft;
+    for(int yo = -1; yo <= 1; yo++){
+        for(int xo = -1; xo <= 1; xo++){
+            const Coord adj = iC(pos.x+xo, pos.y+yo);
+            if(coordSame(pos, adj) || !validTilePos(adj, board->len))
+                continue;
+            if(!board->tile[adj.x][adj.y].clear && board->tile[adj.x][adj.y].decal == D_NONE)
+                *board = prop(*board, adj);
+        }
+    }
+    board->tilesLeft = numTilesLeft(board->tile, board->len, board->numBombs);
+    return before - board->tilesLeft;
 }
 
 bool solvable(const Board original)
@@ -320,21 +396,25 @@ bool solvable(const Board original)
         memcpy(board.tile[x], original.tile[x], sizeof(Tile)*board.len.y);
     }
 
-    bool progress = false;
+    uint tries = 3;
     do{
+        bool progress = false;
         for(int y = 0; y < board.len.y; y++){
             for(int x = 0; x < board.len.x; x++){
-
+                if(board.tile[x][y].clear){
+                    const Coord pos = iC(x,y);
+                    progress |= flagAdj(&board, pos);
+                    const uint cleared = clearAdj(&board, pos);
+                    progress |= cleared;
+                    board.tilesLeft -= cleared;
+                }
             }
         }
-    }while(progress);
-
-
-    printBoard(original);
-    printBoard(board);
+        tries = progress ? 3 : tries-1;
+    }while(tries);
 
     boardFree(board);
-    return true;
+    return !board.tilesLeft;
 }
 
 int main(int argc, char **argv)
@@ -361,7 +441,7 @@ int main(int argc, char **argv)
     printf("%ux%u - %u\n", len.x, len.y, bombs);
     init();
     Length window = maximizeWindow();
-    Board board = boardInit(len);
+    Board board = boardInit(len, bombs);
 
     Coord down[2] = {0};
 
@@ -379,18 +459,10 @@ int main(int argc, char **argv)
             // printf("M_L - (%3i,%3i)[%2i,%2i]\n", mouse.pos.x, mouse.pos.y, tilePos.x, tilePos.y);
             if(validTilePos(tilePos, board.len)){
                 if(board.firstClick){
-
                     board = boardFirstClick(board, tilePos, bombs);
-                    const uint before = board.tilesLeft;
-                    board = prop(board, tilePos);
-                    board.tilesLeft = numTilesLeft(board.tile, board.len, board.numBombs);
-                    printf(
-                        "Before: %u, After: %u, Cleared: %u\n",
-                        before, board.tilesLeft, before - board.tilesLeft
-                    );
                 }else{
                     if(board.tile[tilePos.x][tilePos.y].isBomb)
-                        loose(board, tilePos);
+                        endGame(board, tilePos, false);
                     if(!board.tile[tilePos.x][tilePos.y].clear){
                         const uint before = board.tilesLeft;
                         board = prop(board, tilePos);
@@ -399,6 +471,8 @@ int main(int argc, char **argv)
                             "Before: %u, After: %u, Cleared: %u\n",
                             before, board.tilesLeft, before - board.tilesLeft
                         );
+                        if(board.tilesLeft == 0)
+                            endGame(board, tilePos, true);
                     }
                 }
             }
