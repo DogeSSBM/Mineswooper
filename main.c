@@ -21,6 +21,8 @@ typedef struct{
     Tile **tile;
 }Board;
 
+typedef enum{A_LEN, A_MIN, A_TYP, A_ERR, A_N}ArgType;
+
 uint scale(const Length len)
 {
     const Length win = getWindowLen();
@@ -140,9 +142,10 @@ Board boardFree(Board board)
     return board;
 }
 
-Board boardInit(const Length len, const uint bombs)
+Board boardInit(const Length len, const uint bombs, const BoardType type)
 {
     Board ret = {
+        .type = type,
         .len = len,
         .scale = scale(len),
         .numBombs = bombs,
@@ -178,11 +181,11 @@ Board boardFirstClick(Board board, const Coord firstClick, const uint numBombs)
     return board;
 }
 
-uint parseUint(char *str)
+uint parseUint(char *str, const uint len)
 {
     char *end;
     const uint ret = strtoul(str, &end, 0);
-    if(end != str+strlen(str)){
+    if(end-str > len){
         fprintf(stderr, "junk arg: \"%s\"\n", str);
         exit(EXIT_FAILURE);
     }
@@ -423,15 +426,85 @@ bool solvable(const Board original)
 void usage(const char *prog)
 {
     printf("Usage -\n");
-    printf("\t%s [-l <Width,Height>] [-b <Num Bombs>] [-t ]", prog)
+    printf("\t%s [Width,Height] [Num Bombs] [RNG|ADJ|SAT]\n\n", prog);
+    printf("Default options are: 30,16 99 RNG\n");
+    exit(EXIT_FAILURE);
 }
+
+ArgType parseType(const char *arg)
+{
+    if(!arg || strlen(arg) == 0)
+        return A_ERR;
+    if(isdigit(*arg)){
+        if(strchr(arg, ','))
+            return A_LEN;
+        return A_MIN;
+    }
+    return A_TYP;
+}
+
+Length parseLen(char *arg)
+{
+    const uint slen = strlen(arg);
+    const char *comma = strchr(arg, ',');
+    return iC(
+        parseUint(arg, comma-arg),
+        parseUint(comma+1, strlen(comma+1))
+    );
+}
+
+uint parseBombs(const char *arg)
+{
+    return parseUint(arg, strlen(arg));
+}
+
+BoardType parseType(const char *arg)
+{
+    if(strlen(arg) != 3)
+        return A_ERR;
+}
+
 
 Board parseArgs(const int argc, char **argv)
 {
-    for(uint i = 0; i < argc; i++){
+    if(argc > 4)
+        usage(argv[0]);
 
+    BoardType type = B_RNG;
+    Length len = iC(30, 16);
+    uint bombs = 99;
+
+    bool lenDone = false;
+    bool bombsDone = false;
+    bool typeDone = false;
+    for(uint i = 1; i < argc; i++){
+        switch(parseType(argv[i])){
+            case A_LEN:
+                if(lenDone)
+                    usage(argv[0]);
+                len = parseLen(argv[i]);
+                lenDone = true;
+                break;
+            case A_MIN:
+                if(bombsDone)
+                    usage(argv[0]);
+                bombs = parseBombs(argv[i]);
+                bombsDone = true;
+                break;
+            case A_TYP:
+                if(typeDone)
+                    usage(argv[0]);
+                type = parseType(argv[i]);
+                typeDone = true;
+                break;
+            case A_ERR:
+            default:
+                usage(argv[0]);
+                break;
+        }
     }
 
+    return boardInit(len, bombs, type);
 }
 
 int main(int argc, char **argv)
@@ -458,7 +531,7 @@ int main(int argc, char **argv)
     printf("%ux%u - %u\n", len.x, len.y, bombs);
     init();
     Length window = maximizeWindow();
-    Board board = boardInit(len, bombs);
+    Board board = boardInit(len, bombs, type);
 
     Coord down[2] = {0};
 
