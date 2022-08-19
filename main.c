@@ -9,7 +9,10 @@ typedef struct{
     uint num;
 }Tile;
 
+typedef enum{B_RNG, B_ADJ, B_SAT, B_N}BoardType;
+const char *BoardTypeStr[B_N] = {"B_RNG", "B_ADJ", "B_SAT"};
 typedef struct{
+    BoardType type;
     Length len;
     uint numBombs;
     uint tilesLeft;
@@ -415,6 +418,20 @@ bool solvable(const Board original)
 
     boardFree(board);
     return !board.tilesLeft;
+}
+
+void usage(const char *prog)
+{
+    printf("Usage -\n");
+    printf("\t%s [-l <Width,Height>] [-b <Num Bombs>] [-t ]", prog)
+}
+
+Board parseArgs(const int argc, char **argv)
+{
+    for(uint i = 0; i < argc; i++){
+
+    }
+
 }
 
 int main(int argc, char **argv)
