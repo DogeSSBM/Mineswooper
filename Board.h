@@ -1,6 +1,43 @@
 #ifndef BOARD_H
 #define BOARD_H
 
+void printBoard(const Board board)
+{
+    if(!board.tile){
+        printf("board.tile == NULL\n");
+        return;
+    }
+    for(int y = 0; y < board.len.y; y++){
+        for(int x = 0; x < board.len.x; x++){
+            if(board.tile[x][y].isBomb)
+                putchar('B');
+            else
+                putchar('0'+board.tile[x][y].num);
+            putchar(' ');
+        }
+        putchar('\n');
+    }
+    putchar('\n');
+}
+
+void printDecals(const Board board)
+{
+    if(!board.tile){
+        printf("board.tile == NULL\n");
+        return;
+    }    for(int y = 0; y < board.len.y; y++){
+        for(int x = 0; x < board.len.x; x++){
+            if(board.tile[x][y].state == S_NUM)
+                putchar(board.tile[x][y].num ? '0'+board.tile[x][y].num : '-');
+            else
+                putchar(board.tile[x][y].state == S_QEST ? '?' : '>');
+            putchar(' ');
+        }
+        putchar('\n');
+    }
+    putchar('\n');
+}
+
 uint lin(const Coord pos, const Length len)
 {
     return pos.y*len.x+pos.x;
@@ -75,7 +112,7 @@ void drawBoard(const Board board)
             if(board.tile[x][y].state == S_NUM){
                 setColor(GREY3);
                 fillSquareCoordResize(pos, board.scale, -1);
-                if(board.tile[x][y].state > 0){
+                if(board.tile[x][y].num > 0){
                     setTextSize(board.scale);
                     setTextColor(numColor[board.tile[x][y].num]);
                     char txt[2] = "0";
@@ -103,6 +140,30 @@ bool inArr(const uint n, uint *arr, const uint len)
         if(arr[i] == n)
             return true;
     return false;
+}
+
+uint adjTileState(const Board board, const Coord pos, const TileState state)
+{
+    uint count = 0;
+    for(int yo = -1; yo <= 1; yo++){
+        for(int xo = -1; xo <= 1; xo++){
+            const Coord adj = {.x = pos.x+xo, .y = pos.y+yo};
+            count += validTilePos(adj, board.len) && !coordSame(pos, adj) && board.tile[adj.x][adj.y].state == state;
+        }
+    }
+    return count;
+}
+
+uint adjBombs(const Board board, const Coord pos)
+{
+    uint count = 0;
+    for(int yo = -1; yo <= 1; yo++){
+        for(int xo = -1; xo <= 1; xo++){
+            const Coord adj = {.x = pos.x+xo, .y = pos.y+yo};
+            count += validTilePos(adj, board.len) && !coordSame(pos, adj) && board.tile[adj.x][adj.y].isBomb;
+        }
+    }
+    return count;
 }
 
 Board boardRng(Board board, Coord firstClick)
@@ -168,6 +229,13 @@ Board boardInit(Board board, const Coord firstClick)
             break;
     }
     board.bombsPlaced = true;
+
+    for(int y = 0; y < board.len.y; y++){
+        for(int x = 0; x < board.len.x; x++){
+            board.tile[x][y].num = adjBombs(board, iC(x,y));
+        }
+    }
+
     return board;
 }
 
@@ -208,6 +276,37 @@ Board boardArgs(int argc, char **argv)
     }
 
     return boardAlloc(board);
+}
+
+Board prop(Board board, const Coord pos)
+{
+    if(!board.bombsPlaced){
+        board = boardInit(board, pos);
+        board.bombsPlaced = true;
+        printBoard(board);
+    }
+
+    if(!validTilePos(pos, board.len) || board.tile[pos.x][pos.y].state != S_TILE)
+        return board;
+
+    board.tile[pos.x][pos.y].state = S_NUM;
+    if(board.tile[pos.x][pos.y].num)
+        return board;
+
+    for(int yo = -1; yo <= 1; yo++){
+        for(int xo = -1; xo <= 1; xo++){
+            const Coord adj = {.x = pos.x+xo, .y = pos.y+yo};
+            if(
+                coordSame(pos, adj) ||
+                !validTilePos(adj, board.len) ||
+                board.tile[pos.x][pos.y].state != S_TILE
+            )
+                continue;
+            board = prop(board, adj);
+        }
+    }
+
+    return board;
 }
 
 #endif /* end of include guard: BOARD_H */

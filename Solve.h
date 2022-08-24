@@ -1,24 +1,10 @@
 #ifndef SOLVE_H
 #define SOLVE_H
 
-uint adjState(Board *board, const Coord pos, const TileState state)
-{
-    uint ret = 0;
-    for(int yo = -1; yo <= 1; yo++){
-        for(int xo = -1; xo <= 1; xo++){
-            const Coord adj = iC(pos.x+xo, pos.y+yo);
-            if(coordSame(pos, adj) || !validTilePos(adj, board->len))
-                continue;
-            ret += board->tile[adj.x][adj.y].state == state;
-        }
-    }
-    return ret;
-}
-
 uint flagAdj(Board *board, const Coord pos)
 {
-    const uint unflagged = adjState(board, pos, S_TILE);
-    if(unflagged != board->tile[pos.x][pos.y].num - adjState(board, pos, S_FLAG))
+    const uint unflagged = adjTileState(*board, pos, S_TILE);
+    if(unflagged != board->tile[pos.x][pos.y].num - adjTileState(*board, pos, S_FLAG))
         return 0;
     for(int yo = -1; yo <= 1; yo++){
         for(int xo = -1; xo <= 1; xo++){
@@ -42,30 +28,9 @@ Board numTilesLeft(Board board)
     return board;
 }
 
-Board prop(Board board, const Coord pos)
-{
-    if(!validTilePos(pos, board.len) || board.tile[pos.x][pos.y].isBomb)
-        return board;
-
-    board.tile[pos.x][pos.y].state = S_NUM;
-    if(board.tile[pos.x][pos.y].num)
-        return board;
-
-    for(int yo = -1; yo <= 1; yo++){
-        for(int xo = -1; xo <= 1; xo++){
-            const Coord adj = {.x = pos.x+xo, .y = pos.y+yo};
-            if(coordSame(pos, adj) || !validTilePos(adj, board.len) || board.tile[pos.x][pos.y].state == S_NUM)
-                continue;
-            board = prop(board, adj);
-        }
-    }
-
-    return board;
-}
-
 uint clearAdj(Board *board, const Coord pos)
 {
-    if(adjState(board, pos, S_FLAG) != board->tile[pos.x][pos.y].num)
+    if(adjTileState(*board, pos, S_FLAG) != board->tile[pos.x][pos.y].num)
         return 0;
     *board = numTilesLeft(*board);
     const uint before = board->tilesLeft;

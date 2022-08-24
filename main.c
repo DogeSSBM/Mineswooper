@@ -6,7 +6,7 @@ int main(int argc, char **argv)
     init();
     Length win = maximizeWindow();
     Board board = boardArgs(argc, argv);
-
+    printBoard(board);
     while(1){
         const uint t = frameStart();
         if(keyPressed(SDL_SCANCODE_ESCAPE))
@@ -34,9 +34,23 @@ int main(int argc, char **argv)
             printf("Scale: %u\nOffset: %i,%i\n", board.scale, board.off.x, board.off.y);
         }
 
+        const Coord tpos = mouseTilePos(board);
+        switch(clickInput(board))
+        {
+            case C_CLEAR:
+                board = prop(board, tpos);
+                break;
+            case C_DECAL:
+                if(board.tile[tpos.x][tpos.y].state != S_NUM){
+                    board.tile[tpos.x][tpos.y].state = wrap(board.tile[tpos.x][tpos.y].state+1, S_TILE, S_N);
+                }
+                break;
+            default:
+                break;
+        }
+
         drawBoard(board);
 
-        const Coord tpos = mouseTilePos(board);
         setColor(CYAN);
         drawSquareCoord(tileMousePos(board, tpos), board.scale);
         setTextSize(board.scale);

@@ -20,20 +20,25 @@ ClickType clickInput(const Board board)
     if(mouseBtnPressed(MOUSE_R))
         down[1] = mouseTilePos(board);
 
+    const Coord tpos = mouseTilePos(board);
     if(
+        validTilePos(tpos, board.len) &&
         mouseBtnReleased(MOUSE_L) &&
-        coordSame(down[0], mouseTilePos(board)) &&
+        coordSame(down[0], tpos) &&
         !mouseBtnState(MOUSE_R)
-    )
+    ){
+        printf("MOUSE_L -\n\ttpos: (%i,%i)\n\tmpos: (%i,%i)\n", tpos.x, tpos.y, mouse.pos.x, mouse.pos.y);
         return C_CLEAR;
-
+    }
     if(
+        validTilePos(tpos, board.len) &&
         mouseBtnReleased(MOUSE_R) &&
-        coordSame(down[1], mouseTilePos(board)) &&
+        coordSame(down[1], tpos) &&
         !mouseBtnState(MOUSE_L)
-    )
-        return C_FLAG;
-
+    ){
+        printf("MOUSE_R -\n\ttpos: (%i,%i)\n\tmpos: (%i,%i)\n", tpos.x, tpos.y, mouse.pos.x, mouse.pos.y);
+        return C_DECAL;
+    }
     return C_NONE;
 }
 

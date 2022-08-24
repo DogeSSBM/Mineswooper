@@ -22,6 +22,7 @@ typedef struct{
 
 typedef enum{A_LEN, A_MIN, A_TYP, A_N}ArgType;
 
-typedef enum{C_NONE, C_CLEAR, C_FLAG, C_CHORD, C_N}ClickType;
+typedef enum{C_NONE, C_CLEAR, C_DECAL, C_CHORD, C_N}ClickType;
+const char *ClickTypeStr[C_N] = {"C_NONE", "C_CLEAR", "C_DECAL", "C_CHORD"};
 
 #endif /* end of include guard: TYPES_H */
