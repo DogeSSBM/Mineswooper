@@ -1,0 +1,119 @@
+#ifndef SOLVE_H
+#define SOLVE_H
+
+uint adjState(Board *board, const Coord pos, const TileState state)
+{
+    uint ret = 0;
+    for(int yo = -1; yo <= 1; yo++){
+        for(int xo = -1; xo <= 1; xo++){
+            const Coord adj = iC(pos.x+xo, pos.y+yo);
+            if(coordSame(pos, adj) || !validTilePos(adj, board->len))
+                continue;
+            ret += board->tile[adj.x][adj.y].state == state;
+        }
+    }
+    return ret;
+}
+
+uint flagAdj(Board *board, const Coord pos)
+{
+    const uint unflagged = adjState(board, pos, S_TILE);
+    if(unflagged != board->tile[pos.x][pos.y].num - adjState(board, pos, S_FLAG))
+        return 0;
+    for(int yo = -1; yo <= 1; yo++){
+        for(int xo = -1; xo <= 1; xo++){
+            const Coord adj = iC(pos.x+xo, pos.y+yo);
+            if(coordSame(pos, adj) || !validTilePos(adj, board->len))
+                continue;
+            board->tile[adj.x][adj.y].state = S_FLAG;
+        }
+    }
+    return unflagged;
+}
+
+Board numTilesLeft(Board board)
+{
+    board.tilesLeft = board.len.x * board.len.y - board.numBombs;
+    for(int y = 0; y < board.len.y; y++){
+        for(int x = 0; x < board.len.x; x++){
+            board.tilesLeft -= board.tile[x][y].state == S_NUM;
+        }
+    }
+    return board;
+}
+
+Board prop(Board board, const Coord pos)
+{
+    if(!validTilePos(pos, board.len) || board.tile[pos.x][pos.y].isBomb)
+        return board;
+
+    board.tile[pos.x][pos.y].state = S_NUM;
+    if(board.tile[pos.x][pos.y].num)
+        return board;
+
+    for(int yo = -1; yo <= 1; yo++){
+        for(int xo = -1; xo <= 1; xo++){
+            const Coord adj = {.x = pos.x+xo, .y = pos.y+yo};
+            if(coordSame(pos, adj) || !validTilePos(adj, board.len) || board.tile[pos.x][pos.y].state == S_NUM)
+                continue;
+            board = prop(board, adj);
+        }
+    }
+
+    return board;
+}
+
+uint clearAdj(Board *board, const Coord pos)
+{
+    if(adjState(board, pos, S_FLAG) != board->tile[pos.x][pos.y].num)
+        return 0;
+    *board = numTilesLeft(*board);
+    const uint before = board->tilesLeft;
+    for(int yo = -1; yo <= 1; yo++){
+        for(int xo = -1; xo <= 1; xo++){
+            const Coord adj = iC(pos.x+xo, pos.y+yo);
+            if(coordSame(pos, adj) || !validTilePos(adj, board->len))
+                continue;
+            if(
+                board->tile[adj.x][adj.y].state == S_NUM &&
+                board->tile[adj.x][adj.y].num == 0 &&
+                board->tile[adj.x][adj.y].state == S_TILE
+            )
+                *board = prop(*board, adj);
+        }
+    }
+    *board = numTilesLeft(*board);
+    return before - board->tilesLeft;
+}
+
+bool solvableAdj(const Board original)
+{
+    Board board = original;
+    board.tile = calloc(board.len.x, sizeof(Tile*));
+    for(int x = 0; x < board.len.x; x++){
+        board.tile[x] = calloc(board.len.y, sizeof(Tile));
+        memcpy(board.tile[x], original.tile[x], sizeof(Tile)*board.len.y);
+    }
+
+    uint tries = 3;
+    do{
+        bool progress = false;
+        for(int y = 0; y < board.len.y; y++){
+            for(int x = 0; x < board.len.x; x++){
+                if(board.tile[x][y].state == S_NUM){
+                    const Coord pos = iC(x,y);
+                    progress |= flagAdj(&board, pos);
+                    const uint cleared = clearAdj(&board, pos);
+                    progress |= cleared;
+                    board.tilesLeft -= cleared;
+                }
+            }
+        }
+        tries = progress ? 3 : tries-1;
+    }while(tries);
+
+    boardFree(board);
+    return !board.tilesLeft;
+}
+
+#endif /* end of include guard: SOLVE_H */
