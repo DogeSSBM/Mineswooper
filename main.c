@@ -38,7 +38,7 @@ Board restart(Board board, const Coord tpos)
 int main(int argc, char **argv)
 {
     init();
-    maximizeWindow();
+    // maximizeWindow();
     Board board = boardArgs(argc, argv);
     board = restart(board, iC(-1,-1));
     while(1){

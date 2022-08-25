@@ -1,6 +1,6 @@
 #pragma once
 #define TPS		1000
-#define FPS		60
+#define FPS		30
 #define TPF		(TPS/FPS)
 
 static inline

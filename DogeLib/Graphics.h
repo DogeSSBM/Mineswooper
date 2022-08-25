@@ -603,13 +603,8 @@ void gfx_init(void)
         exit(0);
     }
 
-    SDL_CreateWindowAndRenderer(
-        DEFAULT_WINDOW_XLEN,
-        DEFAULT_WINDOW_YLEN,
-        SDL_WINDOW_RESIZABLE,
-        &gfx.window,
-        &gfx.renderer
-    );
+    gfx.window = SDL_CreateWindow("main.out", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, DEFAULT_WINDOW_XLEN, DEFAULT_WINDOW_YLEN, SDL_WINDOW_RESIZABLE);
+    gfx.renderer = SDL_CreateRenderer(gfx.window, -1, SDL_RENDERER_ACCELERATED);
     printf("Adding gfx_quit to atexit()\n");
     atexit(gfx_quit);
 

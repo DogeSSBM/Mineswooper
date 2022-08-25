@@ -313,7 +313,7 @@ Board boardArgs(int argc, char **argv)
         }
     }
 
-    return boardAlloc(board);
+    return boardFit(board = boardAlloc(board));
 }
 
 Board prop(Board board, const Coord pos)
