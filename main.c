@@ -12,6 +12,8 @@ Board restart(Board board, const Coord tpos)
             imax(1, board.len.x+keyPressed(SDL_SCANCODE_RIGHT)-keyPressed(SDL_SCANCODE_LEFT)),
             imax(1, board.len.y+keyPressed(SDL_SCANCODE_DOWN)-keyPressed(SDL_SCANCODE_UP))
         );
+        if(windowResized())
+            board = boardFit(board);
         if(!coordSame(newLen, board.len)){
             board = boardFree(board);
             board.len = newLen;
