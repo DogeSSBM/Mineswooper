@@ -28,7 +28,7 @@ ClickType clickInput(const Board board)
         !mouseBtnState(MOUSE_R)
     ){
         printf("MOUSE_L -\n\ttpos: (%i,%i)\n\tmpos: (%i,%i)\n", tpos.x, tpos.y, mouse.pos.x, mouse.pos.y);
-        return C_CLEAR;
+        return board.tile[tpos.x][tpos.y].isBomb ? C_LOOSE : C_CLEAR;
     }
     if(
         validTilePos(tpos, board.len) &&

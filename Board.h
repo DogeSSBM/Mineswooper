@@ -92,6 +92,20 @@ Board boardAlloc(Board board)
     return board;
 }
 
+void drawBoom(const Board board, const Coord tpos)
+{
+    if(!validTilePos(tpos, board.len))
+        return;
+    setColor(YELLOW);
+    fillSquareCoord(tileMousePos(board, tpos), board.scale);
+    setColor(RED);
+    fillSquareCoordResize(tileMousePos(board, tpos), board.scale, -board.scale/4);
+    setColor(BLACK);
+    fillCircleCoord(tileMousePos(board, tpos), board.scale/3);
+    setTextSize(board.scale);
+    setColor(GREY);
+}
+
 void drawBoard(const Board board)
 {
     static const Color numColor[] = {
@@ -114,7 +128,7 @@ void drawBoard(const Board board)
                 fillSquareCoordResize(pos, board.scale, -1);
                 if(board.tile[x][y].num > 0){
                     setTextSize(board.scale);
-                    setTextColor(numColor[board.tile[x][y].num]);
+                    setTextColor(numColor[board.tile[x][y].num - 1]);
                     char txt[2] = "0";
                     txt[0] = '0'+board.tile[x][y].num;
                     drawTextCenteredCoord(txt, coordOffset(pos, iC(board.scale/2, board.scale/2)));
@@ -124,6 +138,30 @@ void drawBoard(const Board board)
                 fillSquareCoordResize(pos, board.scale, -1);
                 setColor(GREY2);
                 fillSquareCoordResize(pos, board.scale, -1 -(board.scale/8));
+                if(board.tile[x][y].state == S_FLAG){
+                    const uint t1 = board.scale/3;
+                    const uint t2 = t1*2;
+                    const uint n1 = t1/3;
+                    const uint n2 = n1*2;
+
+                    setColor(BLACK);
+                    const Coord p1 = coordShift(coordShift(pos, DIR_R, t1+n1), DIR_D, n1);
+                    const Coord p2 = coordShift(coordShift(pos, DIR_R, t1+n2), DIR_D, t2+n1);
+                    fillRectCoords(p1, p2);
+                    const Coord b1 = coordShift(coordShift(pos, DIR_R, t1), DIR_D, t2+n1);
+                    const Coord b2 = coordShift(coordShift(pos, DIR_R, t2), DIR_D, t2+n2);
+                    fillRectCoords(b1, b2);
+                    setColor(RED);
+                    Coord f[3] = {
+                        coordShift(p1, DIR_R, n1),
+                        coordShift(coordShift(p1, DIR_R, t1+n1), DIR_D, n2),
+                        coordShift(coordShift(p1, DIR_R, n1), DIR_D, t1+n1)
+                    };
+                    fillPoly(f, 3);
+                }else if(board.tile[x][y].state == S_QEST){
+                    setTextColor(BLACK);
+                    drawTextCenteredCoord("?",coordOffset(pos, (const Coord){.x=board.scale/2,.y=board.scale/2}));
+                }
             }
         }
     }
@@ -290,7 +328,7 @@ Board prop(Board board, const Coord pos)
         return board;
 
     board.tile[pos.x][pos.y].state = S_NUM;
-    if(board.tile[pos.x][pos.y].num)
+    if(board.tile[pos.x][pos.y].num > 0)
         return board;
 
     for(int yo = -1; yo <= 1; yo++){
@@ -299,7 +337,7 @@ Board prop(Board board, const Coord pos)
             if(
                 coordSame(pos, adj) ||
                 !validTilePos(adj, board.len) ||
-                board.tile[pos.x][pos.y].state != S_TILE
+                board.tile[adj.x][adj.y].state != S_TILE
             )
                 continue;
             board = prop(board, adj);
