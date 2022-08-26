@@ -51,7 +51,7 @@ uint clearAdj(Board *board, const Coord pos)
     return before - board->tilesLeft;
 }
 
-bool solvableAdj(const Board original)
+bool solvableAdj(const Board original, const Coord firstClick)
 {
     Board board = original;
     board.tile = calloc(board.len.x, sizeof(Tile*));
@@ -59,6 +59,7 @@ bool solvableAdj(const Board original)
         board.tile[x] = calloc(board.len.y, sizeof(Tile));
         memcpy(board.tile[x], original.tile[x], sizeof(Tile)*board.len.y);
     }
+    board = prop(board, firstClick);
 
     uint tries = 3;
     do{

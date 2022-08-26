@@ -88,6 +88,9 @@ Board boardAlloc(Board board)
         for(int y = 0; y < board.len.y; y++)
             board.tile[x][y].state = S_TILE;
     }
+    printf("Board -\n");
+    printf("\tlen: {%i,%i}\n", board.len.x, board.len.y);
+    printf("\tnumBombs: %u\n\n", board.numBombs);
 
     return board;
 }
@@ -212,6 +215,8 @@ Board boardResetTiles(Board board)
     for(int y = 0; y < board.len.y; y++){
         for(int x = 0; x < board.len.x; x++){
             board.tile[x][y].state = S_TILE;
+            board.tile[x][y].isBomb = false;
+            board.tile[x][y].num = 0;
         }
     }
     return board;
@@ -248,9 +253,18 @@ Board boardRng(Board board, Coord firstClick)
     return board;
 }
 
+Board boardAdj(Board board, Coord firstClick)
+{
+    do{
+        board = boardResetTiles(board);
+        board = boardRng(board, firstClick);
+    }while(!solvableAdj(board, firstClick));
+    return board;
+}
+
 Board boardInit(Board board, const Coord firstClick)
 {
-    board = boardFree(board);
+    //board = boardFree(board);
     if(!validTilePos(firstClick, board.len)){
         fprintf(stderr, "Firstclick invalid\n");
         fprintf(stderr, "firstclick: %i,%i\n", firstClick.x, firstClick.y);
@@ -272,7 +286,7 @@ Board boardInit(Board board, const Coord firstClick)
             board = boardRng(board, firstClick);
             break;
         case B_ADJ:
-
+            board = boardAdj(board, firstClick);
             break;
         case B_SAT:
         default:

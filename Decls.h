@@ -38,6 +38,6 @@ ClickType clickInput(const Board);
 uint adjDecal(Board *, const Coord, const TileState);
 uint flagAdj(Board *, const Coord);
 uint clearAdj(Board *, const Coord);
-bool solvableAdj(const Board);
+bool solvableAdj(const Board, const Coord);
 
 #endif /* end of include guard: DECLS_H */

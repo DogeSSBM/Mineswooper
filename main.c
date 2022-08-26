@@ -21,7 +21,8 @@ Board restart(Board board, const Coord tpos)
             board = boardFit(board);
         }
         drawBoard(board);
-        drawBoom(board, tpos);
+        if(validTilePos(tpos, board.len))
+            drawBoom(board, tpos);
 
         setColor(GREY);
         setTextColor(WHITE);
