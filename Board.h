@@ -96,12 +96,13 @@ void drawBoom(const Board board, const Coord tpos)
 {
     if(!validTilePos(tpos, board.len))
         return;
+    const Coord pos = tileMousePos(board, tpos);
     setColor(YELLOW);
-    fillSquareCoord(tileMousePos(board, tpos), board.scale);
+    fillSquareCoord(pos, board.scale);
     setColor(RED);
-    fillSquareCoordResize(tileMousePos(board, tpos), board.scale, -board.scale/4);
+    fillSquareCoordResize(pos, board.scale, -2);
     setColor(BLACK);
-    fillCircleCoord(tileMousePos(board, tpos), board.scale/3);
+    fillCircleCoord(coordOffset(pos, coordDiv(iC(board.scale,board.scale),2)), board.scale/3);
     setTextSize(board.scale);
     setColor(GREY);
 }
@@ -286,7 +287,7 @@ Board boardArgs(int argc, char **argv)
 
     bool lenDone = false;
     bool bombsDone = false;
-    // bool typeDone = false;
+    bool typeDone = false;
     for(int i = 1; i < argc; i++){
         switch(parseArgType(argv[i])){
             case A_LEN:
@@ -301,12 +302,12 @@ Board boardArgs(int argc, char **argv)
                 board.numBombs = parseBombs(argv[i]);
                 bombsDone = true;
                 break;
-            // case A_TYP:
-            //     if(typeDone)
-            //         usage();
-            //     board.type = parseType(argv[i]);
-            //     typeDone = true;
-            //     break;
+            case A_TYP:
+                if(typeDone)
+                    usage();
+                board.type = parseType(argv[i]);
+                typeDone = true;
+                break;
             default:
                 usage();
                 break;

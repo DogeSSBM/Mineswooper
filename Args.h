@@ -44,4 +44,18 @@ uint parseBombs(char *arg)
     return parseUint(arg, strlen(arg));
 }
 
+BoardType parseType(char *arg)
+{
+    if(!arg || strlen(arg) != 3)
+        usage();
+    if(strcmp(arg, "RNG") == 0)
+        return B_RNG;
+    if(strcmp(arg, "ADJ") == 0)
+        return B_ADJ;
+    if(strcmp(arg, "SAT") == 0)
+        return B_SAT;
+    usage();
+    return B_RNG;
+}
+
 #endif /* end of include guard: ARGS_H */
