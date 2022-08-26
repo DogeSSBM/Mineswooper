@@ -205,6 +205,18 @@ uint adjBombs(const Board board, const Coord pos)
     return count;
 }
 
+Board boardResetTiles(Board board)
+{
+    if(!board.tile)
+        panic("Cant boardResetTiles() when board.tile == NULL");
+    for(int y = 0; y < board.len.y; y++){
+        for(int x = 0; x < board.len.x; x++){
+            board.tile[x][y].state = S_TILE;
+        }
+    }
+    return board;
+}
+
 Board boardRng(Board board, Coord firstClick)
 {
     for(Direction d = 0; d < 4; d++){

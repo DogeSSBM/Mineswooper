@@ -29,9 +29,11 @@ Board restart(Board board, const Coord tpos)
         const Rect rect = rectify(coordOffset(getWindowMid(), coordDiv(getTextLength("New Game"), -2)),getTextLength("New Game"));
         fillRectRect(rect);
         drawTextCenteredCoord("New Game", getWindowMid());
-        if(mouseBtnReleased(MOUSE_L) && coordInRect(mouse.pos, rect))
+        if(mouseBtnReleased(MOUSE_L) && coordInRect(mouse.pos, rect)){
+            board.bombsPlaced = false;
+            board = boardResetTiles(board);
             return board;
-
+        }
         frameEnd(t);
     }
     return board;
