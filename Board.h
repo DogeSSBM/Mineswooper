@@ -81,7 +81,7 @@ Board boardFree(Board board)
 Board boardAlloc(Board board)
 {
     if(board.tile)
-        panic("Ya gotta boardFree() before you boardAlloc()!!!1!");
+        panic("Ya gotta boardFree() before you boardAlloc()!!!1!\n");
     board.tile = calloc(board.len.x, sizeof(Tile*));
     for(int x = 0; x < board.len.x; x++){
         board.tile[x] = calloc(board.len.y, sizeof(Tile));
@@ -211,7 +211,7 @@ uint adjBombs(const Board board, const Coord pos)
 Board boardResetTiles(Board board)
 {
     if(!board.tile)
-        panic("Cant boardResetTiles() when board.tile == NULL");
+        panic("Cant boardResetTiles() when board.tile == NULL\n");
     for(int y = 0; y < board.len.y; y++){
         for(int x = 0; x < board.len.x; x++){
             board.tile[x][y].state = S_TILE;
