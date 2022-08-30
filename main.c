@@ -27,14 +27,16 @@ Board restart(Board board, const Coord tpos)
         setColor(GREY);
         setTextColor(WHITE);
         setTextSize(board.scale);
-        const Rect rect = rectify(coordOffset(getWindowMid(), coordDiv(getTextLength("New Game"), -2)),getTextLength("New Game"));
+        const Rect rect = rectify(
+            coordOffset(getWindowMid(), coordDiv(getTextLength("New Game"), -2)),
+            getTextLength("New Game")
+        );
         fillRectRect(rect);
         drawTextCenteredCoord("New Game", getWindowMid());
-        if(mouseBtnReleased(MOUSE_L) && coordInRect(mouse.pos, rect)){
-            board.bombsPlaced = false;
-            board = boardResetTiles(board);
-            return board;
-        }
+
+        if(mouseBtnReleased(MOUSE_L) && coordInRect(mouse.pos, rect))
+            return boardAlloc(board);
+
         frameEnd(t);
     }
     return board;
@@ -65,7 +67,7 @@ int main(int argc, char **argv)
                 break;
             case C_DECAL:
                 if(board.tile[tpos.x][tpos.y].state != S_NUM)
-                    board.tile[tpos.x][tpos.y].state = wrap(board.tile[tpos.x][tpos.y].state+1, S_TILE, S_N+1);
+                    board.tile[tpos.x][tpos.y].state = wrap(board.tile[tpos.x][tpos.y].state+1, S_TILE, S_N);
                 break;
             default:
                 break;

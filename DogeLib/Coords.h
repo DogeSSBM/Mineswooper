@@ -84,13 +84,13 @@ bool inRange(const int n, const Range range)
     return n >= range.min && n < range.max;
 }
 
-int wrap(const int n, const int min, const int max)
+int wrap(const int n, const int a, const int b)
 {
-    const uint size = max-min;
-    if(n < min)
-        return max-abs(n);
-    if(n >= max)
-        return min+(n%size);
+    const uint size = iabs(a-b);
+    if(n < imin(a, b))
+        return imax(a,b)-iabs(n%size);
+    if(n >= imax(a, b))
+        return imin(a,b)+iabs(n%size);
     return n;
 }
 

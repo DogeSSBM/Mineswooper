@@ -75,13 +75,15 @@ Board boardFree(Board board)
         free(board.tile);
         board.tile = NULL;
     }
+    board.bombsPlaced = false;
+    board.tilesLeft = board.len.x*board.len.y-board.numBombs;
     return board;
 }
 
 Board boardAlloc(Board board)
 {
     if(board.tile)
-        panic("Ya gotta boardFree() before you boardAlloc()!!!1!\n");
+        board = boardFree(board);
     board.tile = calloc(board.len.x, sizeof(Tile*));
     for(int x = 0; x < board.len.x; x++){
         board.tile[x] = calloc(board.len.y, sizeof(Tile));
@@ -126,8 +128,14 @@ void drawBoard(const Board board)
 
     for(int y = 0; y < board.len.y; y++){
         for(int x = 0; x < board.len.x; x++){
-            const Coord pos = coordOffset(coordMul(iC(x, y), board.scale), board.off);
-            if(board.tile[x][y].state == S_NUM){
+            // const Coord pos = coordOffset(coordMul(iC(x, y), board.scale), board.off);
+            const Coord pos = tileMousePos(board, iC(x,y));
+            if(!board.tile){
+                setColor(GREY1);
+                fillSquareCoordResize(pos, board.scale, -1);
+                setColor(GREY2);
+                fillSquareCoordResize(pos, board.scale, -1 -(board.scale/8));
+            }else if(board.tile[x][y].state == S_NUM){
                 setColor(GREY3);
                 fillSquareCoordResize(pos, board.scale, -1);
                 if(board.tile[x][y].num > 0){
@@ -211,7 +219,7 @@ uint adjBombs(const Board board, const Coord pos)
 Board boardResetTiles(Board board)
 {
     if(!board.tile)
-        panic("Cant boardResetTiles() when board.tile == NULL\n");
+        board = boardAlloc(board);
     for(int y = 0; y < board.len.y; y++){
         for(int x = 0; x < board.len.x; x++){
             board.tile[x][y].state = S_TILE;
@@ -265,21 +273,16 @@ Board boardAdj(Board board, Coord firstClick)
 Board boardInit(Board board, const Coord firstClick)
 {
     //board = boardFree(board);
-    if(!validTilePos(firstClick, board.len)){
-        fprintf(stderr, "Firstclick invalid\n");
-        fprintf(stderr, "firstclick: %i,%i\n", firstClick.x, firstClick.y);
-        fprintf(stderr, "board.len: %i,%i\n", board.len.x, board.len.y);
-        exit(EXIT_FAILURE);
-    }
+    if(!validTilePos(firstClick, board.len))
+        panic("Firstclick invalid\nfirstclick: %i,%i\nboard.len: %i,%i\n",
+            firstClick.x, firstClick.y, board.len.x, board.len.y
+        );
     const uint numTiles = board.len.x*board.len.y;
-    if(numTiles < board.numBombs+9){
-        fprintf(stderr, "Need at least 3x3 non bomb tiles\n");
-        fprintf(
-            stderr, "Can't fit %u bombs in %ix%i (%i) tiles!\n",
+    if(numTiles < board.numBombs+9)
+        panic("Need at least 3x3 non bomb tiles\nCan't fit %u bombs in %ix%i (%i) tiles!\n",
             board.numBombs, board.len.x, board.len.y, board.len.x*board.len.y
         );
-        usage();
-    }
+
     board = boardAlloc(board);
     switch(board.type){
         case B_RNG:
@@ -340,11 +343,12 @@ Board boardArgs(int argc, char **argv)
         }
     }
 
-    return boardFit(board = boardAlloc(board));
+    return boardFit(board);
 }
 
 Board prop(Board board, const Coord pos)
 {
+
     if(!board.bombsPlaced){
         board = boardInit(board, pos);
         board.bombsPlaced = true;
