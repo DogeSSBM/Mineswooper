@@ -66,8 +66,8 @@ int main(int argc, char **argv)
                 board = prop(board, tpos);
                 break;
             case C_DECAL:
-                if(board.tile[tpos.x][tpos.y].state != S_NUM)
-                    board.tile[tpos.x][tpos.y].state = wrap(board.tile[tpos.x][tpos.y].state+1, S_TILE, S_N);
+                if(++board.tile[tpos.x][tpos.y].state == S_N)
+                    board.tile[tpos.x][tpos.y].state = S_TILE;
                 break;
             default:
                 break;

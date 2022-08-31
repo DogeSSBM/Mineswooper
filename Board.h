@@ -227,6 +227,8 @@ Board boardResetTiles(Board board)
             board.tile[x][y].num = 0;
         }
     }
+    board.tilesLeft = 0;
+    board.bombsPlaced = 0;
     return board;
 }
 
@@ -257,16 +259,19 @@ Board boardRng(Board board, Coord firstClick)
             i++;
         }
     }
-
+    board.bombsPlaced = true;
     return board;
 }
 
 Board boardAdj(Board board, Coord firstClick)
 {
+    uint attempt = 0;
     do{
         board = boardResetTiles(board);
         board = boardRng(board, firstClick);
+        attempt++;
     }while(!solvableAdj(board, firstClick));
+    printf("attempts: %u\n", attempt);
     return board;
 }
 
@@ -296,7 +301,6 @@ Board boardInit(Board board, const Coord firstClick)
             usage();
             break;
     }
-    board.bombsPlaced = true;
 
     for(int y = 0; y < board.len.y; y++){
         for(int x = 0; x < board.len.x; x++){

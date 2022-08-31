@@ -34,7 +34,8 @@ ClickType clickInput(const Board board)
         validTilePos(tpos, board.len) &&
         mouseBtnReleased(MOUSE_R) &&
         coordSame(down[1], tpos) &&
-        !mouseBtnState(MOUSE_L)
+        !mouseBtnState(MOUSE_L) &&
+        board.tile[tpos.x][tpos.y].state != S_NUM
     ){
         printf("MOUSE_R -\n\ttpos: (%i,%i)\n\tmpos: (%i,%i)\n", tpos.x, tpos.y, mouse.pos.x, mouse.pos.y);
         return C_DECAL;
