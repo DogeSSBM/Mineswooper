@@ -27,6 +27,8 @@ int main(int argc, char **argv)
                 if(++board.tile[tpos.x][tpos.y].state == S_N)
                     board.tile[tpos.x][tpos.y].state = S_TILE;
                 break;
+            case C_NONE:
+                break;
             default:
                 panic("Unknown click thingy!??\n");
                 break;
