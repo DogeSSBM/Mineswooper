@@ -28,6 +28,7 @@ int main(int argc, char **argv)
                     board.tile[tpos.x][tpos.y].state = S_TILE;
                 break;
             default:
+                panic("Unknown click thingy!??\n");
                 break;
         }
 
