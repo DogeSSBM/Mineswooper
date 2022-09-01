@@ -262,7 +262,7 @@ Board boardRng(Board board, Coord firstClick)
             i++;
         }
     }
-
+    board.tilesLeft = board.len.x*board.len.y;
     const uint total = board.len.x * board.len.y;
     uint i = 0;
     while(i < board.numBombs){
@@ -270,10 +270,16 @@ Board boardRng(Board board, Coord firstClick)
         const Coord pos = delin(n, board.len);
         if(!inArr(n, res, 9) && !board.tile[pos.x][pos.y].isBomb){
             board.tile[pos.x][pos.y].isBomb = true;
+            board.tilesLeft--;
             i++;
         }
     }
     board.bombsPlaced = true;
+    for(int y = 0; y < board.len.y; y++){
+        for(int x = 0; x < board.len.x; x++){
+            board.tile[x][y].num = adjBombs(board, iC(x,y));
+        }
+    }
     return board;
 }
 
@@ -284,7 +290,7 @@ Board boardAdj(Board board, Coord firstClick)
         board = boardResetTiles(board);
         board = boardRng(board, firstClick);
         attempt++;
-    }while(!solvableAdj(board, firstClick));
+    }while(!solvableAdj(board, firstClick) && attempt < 10000);
     printf("attempts: %u\n", attempt);
     return board;
 }
@@ -314,12 +320,6 @@ Board boardInit(Board board, const Coord firstClick)
         default:
             usage();
             break;
-    }
-
-    for(int y = 0; y < board.len.y; y++){
-        for(int x = 0; x < board.len.x; x++){
-            board.tile[x][y].num = adjBombs(board, iC(x,y));
-        }
     }
 
     return board;
@@ -376,6 +376,7 @@ Board prop(Board board, const Coord pos)
     if(!validTilePos(pos, board.len) || board.tile[pos.x][pos.y].state != S_TILE)
         return board;
 
+    board.tilesLeft -= board.tile[pos.x][pos.y].state == S_TILE;
     board.tile[pos.x][pos.y].state = S_NUM;
     if(board.tile[pos.x][pos.y].num > 0)
         return board;
