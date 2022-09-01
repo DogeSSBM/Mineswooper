@@ -29,6 +29,7 @@ typedef struct{
     uint numBombs;
     uint tilesLeft;
     bool bombsPlaced;
+    bool gameOver;
     BoardType type;
     Tile **tile;
 }Board;
@@ -46,6 +47,7 @@ typedef enum{
     C_DECAL,
     C_CHORD,
     C_LOOSE,
+    C_START,
     C_N
 }ClickType;
 
@@ -53,7 +55,9 @@ const char *ClickTypeStr[C_N] = {
     "C_NONE",
     "C_CLEAR",
     "C_DECAL",
-    "C_CHORD"
+    "C_CHORD",
+    "C_LOOSE",
+    "C_START"
 };
 
 #endif /* end of include guard: TYPES_H */

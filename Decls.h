@@ -19,7 +19,7 @@ Board boardFit(Board);
 Board boardFree(Board);
 Board boardAlloc(Board);
 void drawBoom(const Board, const Coord);
-void drawBoard(const Board);
+Board drawBoard(const Board);
 bool validTilePos(const Coord, const Coord);
 bool inArr(const uint, uint *, const uint);
 uint adjTileState(const Board, const Coord, const TileState);

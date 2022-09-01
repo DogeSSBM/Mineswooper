@@ -21,6 +21,15 @@ ClickType clickInput(const Board board)
         down[1] = mouseTilePos(board);
 
     const Coord tpos = mouseTilePos(board);
+    if(board.gameOver){
+        const Length txtlen = getTextLength("New Game");
+        const Rect rect = rectify(coordOffset(getWindowMid(), coordDiv(txtlen, -2)), txtlen);
+        return mouseBtnReleased(MOUSE_L) &&
+            coordInRect(down[0], rect)  &&
+            coordInRect(mouse.pos, rect) ?
+            C_START : C_NONE;
+    }
+
     if(
         validTilePos(tpos, board.len) &&
         mouseBtnReleased(MOUSE_L) &&
@@ -41,6 +50,23 @@ ClickType clickInput(const Board board)
         return C_DECAL;
     }
     return C_NONE;
+}
+
+Board boardResize(Board board)
+{
+    if(board.gameOver){
+        const Length newLen = iC(
+            imax(1, board.len.x+keyPressed(SDL_SCANCODE_RIGHT)-keyPressed(SDL_SCANCODE_LEFT)),
+            imax(1, board.len.y+keyPressed(SDL_SCANCODE_DOWN)-keyPressed(SDL_SCANCODE_UP))
+        );
+        if(!coordSame(newLen, board.len)){
+            board = boardFree(board);
+            board.len = newLen;
+            board = boardAlloc(board);
+            board = boardFit(board);
+        }
+    }
+    return board;
 }
 
 #endif /* end of include guard: CLICK_H */

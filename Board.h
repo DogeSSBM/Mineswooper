@@ -112,7 +112,7 @@ void drawBoom(const Board board, const Coord tpos)
     setColor(GREY);
 }
 
-void drawBoard(const Board board)
+Board drawBoard(const Board board)
 {
     static const Color numColor[] = {
         {0x00, 0x00, 0xAA, 0xFF},
@@ -177,6 +177,20 @@ void drawBoard(const Board board)
             }
         }
     }
+
+    if(board.gameOver){
+        setColor(GREY);
+        setTextColor(WHITE);
+        setTextSize(board.scale);
+        const Rect rect = rectify(
+            coordOffset(getWindowMid(), coordDiv(getTextLength("New Game"), -2)),
+            getTextLength("New Game")
+        );
+        fillRectRect(rect);
+        drawTextCenteredCoord("New Game", getWindowMid());
+    }
+
+    return windowResized() ? boardFit(board) : board;
 }
 
 bool validTilePos(const Coord pos, const Coord bounds)
@@ -315,7 +329,8 @@ Board boardArgs(int argc, char **argv)
 {
     Board board = {
         .len = iC(30, 16),
-        .numBombs = 99
+        .numBombs = 99,
+        .gameOver = true
     };
 
     bool lenDone = false;
@@ -347,7 +362,7 @@ Board boardArgs(int argc, char **argv)
         }
     }
 
-    return boardFit(board);
+    return boardFit(board = boardAlloc(board));
 }
 
 Board prop(Board board, const Coord pos)
