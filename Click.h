@@ -22,10 +22,10 @@ ClickType clickInput(const Board board)
 
     const Coord tpos = mouseTilePos(board);
     if(board.gameOver){
+        setTextSize(board.scale);
         const Length txtlen = getTextLength("New Game");
         const Rect rect = rectify(coordOffset(getWindowMid(), coordDiv(txtlen, -2)), txtlen);
         return mouseBtnReleased(MOUSE_L) &&
-            coordInRect(down[0], rect)  &&
             coordInRect(mouse.pos, rect) ?
             C_START : C_NONE;
     }

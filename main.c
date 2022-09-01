@@ -18,7 +18,7 @@ int main(int argc, char **argv)
                 break;
             case C_START:
                 board.gameOver = false;
-                boardAlloc(board);
+                board = boardAlloc(board);
                 break;
             case C_CLEAR:
                 board = prop(board, tpos);

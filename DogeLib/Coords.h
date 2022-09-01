@@ -193,7 +193,7 @@ Coord coordSub(const Coord coord1, const Coord coord2)
 
 float coordfDist(const Coordf coord1, const Coordf coord2)
 {
-    return sqrtf(powf(coord2.x-coord1.x,2.0f)+powf(coord2.y-coord1.y,2.0f));
+    return sqrt(powf(coord2.x-coord1.x,2.0f)+powf(coord2.y-coord1.y,2.0f));
 }
 
 Coordf coordfDiv(const Coordf coord, const float num)

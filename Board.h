@@ -367,7 +367,6 @@ Board boardArgs(int argc, char **argv)
 
 Board prop(Board board, const Coord pos)
 {
-
     if(!board.bombsPlaced){
         board = boardInit(board, pos);
         board.bombsPlaced = true;

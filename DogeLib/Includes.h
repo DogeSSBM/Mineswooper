@@ -19,7 +19,6 @@
 
 #include "Types.h"
 #include "Coords.h"
-#include "Vec.h"
 #include "GetInt.h"
 #include "Colors.h"
 #include "Timing.h"
