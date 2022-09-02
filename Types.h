@@ -9,6 +9,20 @@ typedef enum{
     S_N
 }TileState;
 
+const char *TileStateStr[S_N] = {
+    " NUM",
+    "TILE",
+    "FLAG",
+    "QEST"
+};
+
+const char TileStateChar[S_N] = {
+    ' ',
+    '#',
+    '>',
+    '?'
+};
+
 typedef struct{
     bool isBomb;
     uint num;

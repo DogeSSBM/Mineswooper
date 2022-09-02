@@ -28,9 +28,9 @@ void printDecals(const Board board)
     }    for(int y = 0; y < board.len.y; y++){
         for(int x = 0; x < board.len.x; x++){
             if(board.tile[x][y].state == S_NUM)
-                putchar(board.tile[x][y].num ? '0'+board.tile[x][y].num : '-');
+                putchar(board.tile[x][y].num ? '0'+board.tile[x][y].num : ' ');
             else
-                putchar(board.tile[x][y].state == S_QEST ? '?' : '>');
+                putchar(TileStateChar[board.tile[x][y].state]);
             putchar(' ');
         }
         putchar('\n');
@@ -212,7 +212,9 @@ uint adjTileState(const Board board, const Coord pos, const TileState state)
     for(int yo = -1; yo <= 1; yo++){
         for(int xo = -1; xo <= 1; xo++){
             const Coord adj = {.x = pos.x+xo, .y = pos.y+yo};
-            count += validTilePos(adj, board.len) && !coordSame(pos, adj) && board.tile[adj.x][adj.y].state == state;
+            const bool same = validTilePos(adj, board.len) && !coordSame(pos, adj) && board.tile[adj.x][adj.y].state == state;
+            count += state == S_NUM ? same && board.tile[adj.x][adj.y].num : same;
+
         }
     }
     return count;

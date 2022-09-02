@@ -3,52 +3,46 @@
 
 uint flagAdj(Board *board, const Coord pos)
 {
-    const uint unflagged = adjTileState(*board, pos, S_TILE);
-    if(unflagged != board->tile[pos.x][pos.y].num - adjTileState(*board, pos, S_FLAG))
-        return 0;
+    uint flagged = 0;
     for(int yo = -1; yo <= 1; yo++){
         for(int xo = -1; xo <= 1; xo++){
             const Coord adj = iC(pos.x+xo, pos.y+yo);
-            if(coordSame(pos, adj) || !validTilePos(adj, board->len))
+            if(coordSame(pos, adj) || !validTilePos(adj, board->len) || board->tile[adj.x][adj.y].state != S_TILE)
                 continue;
             board->tile[adj.x][adj.y].state = S_FLAG;
+            flagged++;
         }
     }
-    return unflagged;
+    return flagged;
 }
 
-// Board numTilesLeft(Board board)
-// {
-//     board.tilesLeft = board.len.x * board.len.y - board.numBombs;
-//     for(int y = 0; y < board.len.y; y++){
-//         for(int x = 0; x < board.len.x; x++){
-//             board.tilesLeft -= board.tile[x][y].state == S_NUM;
-//         }
-//     }
-//     return board;
-// }
-//
-// uint clearAdj(Board *board, const Coord pos)
-// {
-//     if(adjTileState(*board, pos, S_FLAG) != board->tile[pos.x][pos.y].num)
-//         return 0;
-//     uint cleared = 0;
-//     for(int yo = -1; yo <= 1; yo++){
-//         for(int xo = -1; xo <= 1; xo++){
-//             const Coord adj = iC(pos.x+xo, pos.y+yo);
-//             if(coordSame(pos, adj) || !validTilePos(adj, board->len))
-//                 continue;
-//             if(
-//                 board->tile[adj.x][adj.y].state == S_NUM &&
-//                 board->tile[adj.x][adj.y].num == 0 &&
-//                 board->tile[adj.x][adj.y].state == S_TILE
-//             )
-//                 *board = prop(*board, adj);
-//         }
-//     }
-//     *board = numTilesLeft(*board);
-//     return before - board->tilesLeft;
-// }
+uint clearAdj(Board *board, const Coord pos)
+{
+    uint cleared = 0;
+    for(int yo = -1; yo <= 1; yo++){
+        for(int xo = -1; xo <= 1; xo++){
+            const Coord adj = iC(pos.x+xo, pos.y+yo);
+            if(coordSame(pos, adj) || !validTilePos(adj, board->len) || board->tile[adj.x][adj.y].state != S_TILE)
+                continue;
+            if(board->tile[adj.x][adj.y].isBomb)
+                panic("Cleared adj bomb\n");
+            board->tile[adj.x][adj.y].state = S_NUM;
+            cleared++;
+        }
+    }
+    return cleared;
+}
+
+/*
+while progress
+    trivial flags
+    trivial clears
+
+moar complicated shit
+
+*/
+
+
 
 bool solvableAdj(const Board original, const Coord firstClick)
 {
@@ -65,15 +59,27 @@ bool solvableAdj(const Board original, const Coord firstClick)
         bool progress = false;
         for(int y = 0; y < board.len.y; y++){
             for(int x = 0; x < board.len.x; x++){
+                const Coord pos = iC(x,y);
                 if(board.tile[x][y].state == S_NUM){
-                    const Coord pos = iC(x,y);
-
+                    const uint tiles = adjTileState(board, pos, S_TILE);
+                    if(board.tile[x][y].num && tiles <= board.tile[x][y].num)
+                        progress |= flagAdj(&board, pos);
+                    const uint flags = adjTileState(board, pos, S_FLAG);
+                    if(flags>=board.tile[x][y].num)
+                        progress |= clearAdj(&board, pos);
                 }
             }
         }
         tries = progress ? 3 : tries-1;
-        // printBoard(board);
-        // printf("tries: %u\n", tries);
+        printDecals(board);
+        printf("tries: %u\n", tries);
+        int c;
+        do{
+            c = getchar();
+            if(c == 'q')
+                exit(0);
+        }while(c != '\n');
+
     }while(tries);
 
     boardFree(board);
