@@ -116,50 +116,6 @@ uint adjTileState(const Board board, const Coord pos, const TileState state)
     return count;
 }
 
-// Board boardAdj(Board board, Coord firstClick)
-// {
-//     uint attempt = 0;
-//     do{
-//         board = boardResetTiles(board);
-//         board = boardRng(board, firstClick);
-//         attempt++;
-//     }while(!solvableAdj(board, firstClick) && attempt < 10000);
-//     printf("attempts: %u\n", attempt);
-//     return board;
-// }
-//
-// Board boardInit(Board board, const Coord firstClick)
-// {
-//     //board = boardFree(board);
-//     if(!validTilePos(firstClick, board.len))
-//         panic("Firstclick invalid\nfirstclick: %i,%i\nboard.len: %i,%i\n",
-//             firstClick.x, firstClick.y, board.len.x, board.len.y
-//         );
-//     const uint numTiles = board.len.x*board.len.y;
-//     if(numTiles < board.numBombs+9)
-//         panic("Need at least 3x3 non bomb tiles\nCan't fit %u bombs in %ix%i (%i) tiles!\n",
-//             board.numBombs, board.len.x, board.len.y, board.len.x*board.len.y
-//         );
-//
-//     board = boardAlloc(board);
-//     board.
-//
-//     switch(board.type){
-//         case B_RNG:
-//             board = boardRng(board, firstClick);
-//             break;
-//         case B_ADJ:
-//             board = boardAdj(board, firstClick);
-//             break;
-//         case B_SAT:
-//         default:
-//             usage();
-//             break;
-//     }
-//
-//     return board;
-// }
-
 Board prop(Board board, const Coord pos)
 {
     if(board.state != BS_PLAY)

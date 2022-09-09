@@ -1,43 +1,46 @@
 #ifndef DECLS_H
 #define DECLS_H
 
-// Args.h
+// ARGS_H
 void usage(void);
-uint parseUint(char *, const uint);
-ArgType parseArgType(char *);
-Length parseLen(char *);
-uint parseBombs(char *);
+uint parseUint(char *str, const uint len);
+ArgType parseArgType(char *arg);
+Length parseLen(char *arg);
+uint parseBombs(char *arg);
+BoardType parseType(char *arg);
+Board boardArgs(int argc, char **argv);
 
-// Board.h
-void printBoard(const Board);
-void printDecals(const Board);
-uint lin(const Coord, const Length);
-Coord delin(const uint, const Length);
-uint tileScale(const Length, const Length);
-Offset tileOffset(const Length, const Length, const uint);
-Board boardFit(Board);
-Board boardFree(Board);
-Board boardAlloc(Board);
-void drawBoom(const Board, const Coord);
-void drawBoard(const Board, const MetaInf);
-bool validTilePos(const Coord, const Coord);
-bool inArr(const uint, uint *, const uint);
-uint adjTileState(const Board, const Coord, const TileState);
-uint adjBombs(const Board, const Coord);
-Board boardRng(Board, Coord);
-Board boardInit(Board, const Coord);
-Board boardArgs(int, char **);
-Board prop(Board, const Coord);
+// BOARD_H
+Board boardFree(Board board);
+Board boardAlloc(Board board);
+bool validTilePos(const Coord pos, const Length bounds);
+uint adjBombs(const Board board, const Coord pos);
+Board boardCalcNums(Board board);
+Board boardReset(Board board);
+Board* boardPlaceBombs(Board *board, const Coord firstClick);
+uint adjTileState(const Board board, const Coord pos, const TileState state);
+Board prop(Board board, const Coord pos);
 
-// Click.h
-Coord mouseTilePos(const uint, const Offset);
-Coord tileMousePos(const uint, const Offset, const Coord);
-ClickType clickInput(const Board);
+// SOLVE_H
 
-// Solve.h
-uint adjDecal(Board *, const Coord, const TileState);
-uint flagAdj(Board *, const Coord);
-uint clearAdj(Board *, const Coord);
-bool solvableAdj(const Board, const Coord);
+// UPDATE_H
+Coord mouseTilePos(const uint scale, const Offset boardOff);
+Coord tileMousePos(const uint scale, const Offset boardOff, const Coord tpos);
+MetaInf boardUpdate(Board *board, MetaInf inf);
+
+// PRINT_H
+void printBoard(const Board board);
+void printDecals(const Board board);
+void printDecalsPos(const Board board, const Coord pos);
+
+// DRAW_H
+uint tileScale(const Length win, const Length len);
+Offset tileOffset(const Length win, const Length len, const uint scale);
+void drawBoardBlank(const Length len, const uint scale, const Offset off);
+void drawBoard(const Board board, const MetaInf inf);
+
+// INF_H
+MetaInf updateInf(MetaInf inf);
+MetaInf infBoard(const Board board);
 
 #endif /* end of include guard: DECLS_H */

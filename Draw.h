@@ -47,6 +47,8 @@ void drawBoard(const Board board, const MetaInf inf)
     }
 
     if(board.state == BS_LOOSE){
+        drawBoardBlank(board.len, inf.scale, inf.off);
+        
         if(validTilePos(board.lastClick, board.len)){
             fillSquareCoordResize(board.lastClick, inf.scale, -2);
             setColor(BLACK);

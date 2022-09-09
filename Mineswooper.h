@@ -11,5 +11,6 @@
 #include "Update.h"
 #include "Print.h"
 #include "Draw.h"
+#include "Inf.h"
 
 #endif /* end of include guard: MINESWOOPER_H */
