@@ -61,6 +61,8 @@ Board boardCalcNums(Board board)
 
 Board boardPlaceBombs(Board board, const Coord firstClick)
 {
+    if(board.state != BS_NEW)
+        panic("can only boardPlaceBombs when board.state == BS_NEW, board.state: %s", BoardStateStr[board.state]);
     board = boardReset(board);
     board.lastClick = firstClick;
     for(Direction d = 0; d < 4; d++)
@@ -87,8 +89,6 @@ Board boardPlaceBombs(Board board, const Coord firstClick)
 
 Board boardReset(Board board)
 {
-    if(board.state != BS_LOOSE)
-        panic("Can only boardReset when board.state is BS_LOOSE")
     if(!board.tile)
         return boardAlloc(board);
     for(int y = 0; y < board.len.y; y++){

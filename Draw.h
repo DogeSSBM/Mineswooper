@@ -25,7 +25,7 @@ void drawBoardBlank(const Length len, const uint scale, const Offset off)
     }
 }
 
-void drawBoard(const Board board)
+void drawBoard(const Board board, const bool cheat)
 {
     static const Color numColor[] = {
         {0x00, 0x00, 0xAA, 0xFF},
@@ -42,17 +42,10 @@ void drawBoard(const Board board)
     const Coord mid = getWindowMid();
     const uint scale = tileScale(win, board.len);
     const Offset off = tileOffset(win, board.len, scale);
+    setTextSize(scale);
 
     if(board.state == BS_NEW){
         drawBoardBlank(board.len, scale, off);
-        setColor(GREY);
-        setTextColor(WHITE);
-        const Rect rect = rectify(
-            coordOffset(mid, coordDiv(getTextLength("Start"), -2)),
-            getTextLength("Start")
-        );
-        fillRectRect(rect);
-        drawTextCenteredCoord("Start", mid);
         return;
     }
 
@@ -102,7 +95,7 @@ void drawBoard(const Board board)
                     drawTextCenteredCoord("?",coordOffset(pos, (const Coord){.x=scale/2,.y=scale/2}));
                 }
 
-                if(board.state == BS_LOOSE || (board.cheat && board.tile[x][y].num > 0)){
+                if(board.tile[x][y].num > 0 && (board.tile[x][y].state == S_NUM || board.state == BS_LOOSE || (board.state == BS_PLAY && cheat))){
                     setTextColor(numColor[board.tile[x][y].num - 1]);
                     char txt[2] = "0";
                     txt[0] = '0'+board.tile[x][y].num;
@@ -113,10 +106,7 @@ void drawBoard(const Board board)
     }
 
     if(board.state == BS_LOOSE){
-        const Coord pos = tileMousePos(scale, off, board.lastClick);
-        setColor(YELLOW);
-        fillSquareCoord(pos, scale);
-        setColor(RED);
+
         fillSquareCoordResize(pos, scale, -2);
         setColor(BLACK);
         fillCircleCoord(coordOffset(pos, coordDiv(iC(scale, scale),2)), scale/3);

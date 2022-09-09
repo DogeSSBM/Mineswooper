@@ -10,12 +10,6 @@ Board boardUpdate(Board board)
     const uint scale = tileScale(win, board.len);
     const Offset off = tileOffset(win, board.len, scale);
 
-    const Coord btnOrig = coordSub(mid, iC(scale*4,scale+scale/2));
-    Coord btn[2][3];
-    for(uint i = 0; i < 3; i++){
-        btn[]
-    }
-    for(uint i = 0)
     if(mouseBtnPressed(MOUSE_L))
         down[0] = mouseTilePos(scale, off);
     if(mouseBtnPressed(MOUSE_R))
@@ -23,7 +17,14 @@ Board boardUpdate(Board board)
 
     switch(board.state){
         case BS_NEW:
-
+            const Coord pos = mouseTilePos(scale, off)
+            if(
+                mouseBtnReleased(MOUSE_L) &&
+                validTilePos(pos, board.len) &&
+                validTilePos(down[0], board.len) &&
+                coordSame(down[0], pos)
+            )
+                return boardPlaceBombs(board, firstClick);
             break;
         case BS_PLAY:
 

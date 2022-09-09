@@ -11,54 +11,91 @@ Coord tileMousePos(const uint scale, const Offset boardOff, const Coord tpos)
     return coordOffset(coordMul(tpos, scale), boardOff);
 }
 
-ClickType clickInput(const Board board)
+Board boardUpdate(Board board)
 {
     static Coord down[2] = {0};
 
+    const Length win = getWindowLen();
+    const Coord mid = getWindowMid();
+    const uint scale = tileScale(win, board.len);
+    const Offset off = tileOffset(win, board.len, scale);
+    const Coord pos = mouseTilePos(scale, off)
+
     if(mouseBtnPressed(MOUSE_L))
-        down[0] = mouseTilePos(board);
+        down[0] = pos;
     if(mouseBtnPressed(MOUSE_R))
-        down[1] = mouseTilePos(board);
+        down[1] = pos;
 
-    const Coord tpos = mouseTilePos(board);
-    if(board.gameOver){
-        setTextSize(board.scale);
-        const Length txtlen = getTextLength("New Game");
-        const Rect rect = rectify(coordOffset(getWindowMid(), coordDiv(txtlen, -2)), txtlen);
-        return mouseBtnReleased(MOUSE_L) &&
-            coordInRect(mouse.pos, rect) ?
-            C_START : C_NONE;
+    if(board.state == BS_LOOSE){
+        const Length txtlen = (strlen(" New Game ")*scale, scale);
+        const Rect rect = rectify(coordSub(mid, coordDiv(txtlen,2)), txtlen);
+        if(
+            mouseBtnReleased(MOUSE_L) &&
+            coordInRect(mouse.pos, rect)
+        ){
+            const Length len = board.len;
+            boardFree(board);
+            board.len = len;
+            board = boardAlloc(board);
+            board.state = BS_NEW;
+            return board;
+        }
+        board.len = iC(
+            imax(4, board.len.x+keyPressed(SDL_SCANCODE_RIGHT)-keyPressed(SDL_SCANCODE_LEFT)),
+            imax(4, board.len.y+keyPressed(SDL_SCANCODE_DOWN)-keyPressed(SDL_SCANCODE_UP))
+        );;
     }
 
-    if(
-        validTilePos(tpos, board.len) &&
-        mouseBtnReleased(MOUSE_L) &&
-        coordSame(down[0], tpos) &&
-        !mouseBtnState(MOUSE_R)
-    ){
-        printf("MOUSE_L -\n\ttpos: (%i,%i)\n\tmpos: (%i,%i)\n", tpos.x, tpos.y, mouse.pos.x, mouse.pos.y);
-        return board.tile[tpos.x][tpos.y].isBomb ? C_LOOSE : C_CLEAR;
+    if(board.state == BS_NEW){
+        if(
+            mouseBtnReleased(MOUSE_L) &&
+            validTilePos(pos, board.len) &&
+            validTilePos(down[0], board.len) &&
+            coordSame(down[0], pos)
+        )
+            return boardPlaceBombs(board, firstClick);
     }
-    if(
-        validTilePos(tpos, board.len) &&
-        mouseBtnReleased(MOUSE_R) &&
-        coordSame(down[1], tpos) &&
-        !mouseBtnState(MOUSE_L) &&
-        board.tile[tpos.x][tpos.y].state != S_NUM
-    ){
-        printf("MOUSE_R -\n\ttpos: (%i,%i)\n\tmpos: (%i,%i)\n", tpos.x, tpos.y, mouse.pos.x, mouse.pos.y);
-        return C_DECAL;
+
+    if(board.state = BS_PLAY){
+        if(
+            mouseBtnReleased(MOUSE_L) &&
+            validTilePos(pos, board.len) &&
+            validTilePos(down[0], board.len) &&
+            coordSame(down[0], pos) &&
+            !mouseBtnState(MOUSE_R)
+        ){
+            printf("MOUSE_L -\n\tpos: (%i,%i)\n\tmpos: (%i,%i)\n", pos.x, pos.y, mouse.pos.x, mouse.pos.y);
+            board.lastClick = pos;
+            if(board.tile[pos.x][pos.y].isBomb){
+                board.state = BS_LOOSE;
+                return board;
+            }else{
+                return prop(board, pos);
+            }
+        }
+
+        if(
+            mouseBtnReleased(MOUSE_R) &&
+            validTilePos(pos, board.len) &&
+            validTilePos(down[0], board.len) &&
+            coordSame(down[0], pos) &&
+            !mouseBtnState(MOUSE_L)
+        ){
+            printf("MOUSE_R -\n\tpos: (%i,%i)\n\tmpos: (%i,%i)\n", pos.x, pos.y, mouse.pos.x, mouse.pos.y);
+            if(board.tile[pos.x][pos.y].state != S_NUM){
+                if(++board.tile[pos.x][pos.y].state == S_N)
+                    board.tile[pos.x][pos.y].state = S_TILE;
+                return board;
+            }
+        }
     }
-    return C_NONE;
+    return board;
 }
 
 Board boardResize(Board board)
 {
-    if(board.gameOver){
-        const Length newLen = iC(
-            imax(1, board.len.x+keyPressed(SDL_SCANCODE_RIGHT)-keyPressed(SDL_SCANCODE_LEFT)),
-            imax(1, board.len.y+keyPressed(SDL_SCANCODE_DOWN)-keyPressed(SDL_SCANCODE_UP))
-        );
+
+
         if(!coordSame(newLen, board.len)){
             board = boardFree(board);
             board.len = newLen;

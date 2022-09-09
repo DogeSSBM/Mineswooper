@@ -83,8 +83,6 @@ const char *ClickTypeStr[C_N] = {
     "C_CLEAR",
     "C_DECAL",
     "C_CHORD",
-    "C_LOOSE",
-    "C_START"
 };
 
 #endif /* end of include guard: TYPES_H */
