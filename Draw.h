@@ -49,7 +49,7 @@ void drawBoard(const Board board, const bool cheat)
         return;
     }
 
-    setTextSize(board.scale);
+    setTextSize(scale);
 
     for(int y = 0; y < board.len.y; y++){
         for(int x = 0; x < board.len.x; x++){
