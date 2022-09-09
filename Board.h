@@ -59,6 +59,21 @@ Board boardCalcNums(Board board)
     return board;
 }
 
+Board boardReset(Board board)
+{
+    if(!board.tile)
+        return boardAlloc(board);
+    for(int y = 0; y < board.len.y; y++){
+        for(int x = 0; x < board.len.x; x++){
+            board.tile[x][y].state = S_TILE;
+            board.tile[x][y].isBomb = false;
+            board.tile[x][y].num = 0;
+        }
+    }
+    board.state = BS_NEW;
+    return board;
+}
+
 Board boardPlaceBombs(Board board, const Coord firstClick)
 {
     if(board.state != BS_NEW)
@@ -76,8 +91,8 @@ Board boardPlaceBombs(Board board, const Coord firstClick)
             pos.y = rand()%board.len.y;
         }while(
             board.tile[pos.x][pos.y].isBomb || (
-                inRange(pos.x, board.lastClick.x-1,board.lastClick.x+2) &&
-                inRange(pos.y, board.lastClick.y-1,board.lastClick.y+2)
+                inBound(pos.x, board.lastClick.x-1,board.lastClick.x+2) &&
+                inBound(pos.y, board.lastClick.y-1,board.lastClick.y+2)
             )
         );
         board.tile[pos.x][pos.y].isBomb = true;
@@ -85,34 +100,6 @@ Board boardPlaceBombs(Board board, const Coord firstClick)
 
     board.state = BS_PLAY;
     return boardCalcNums(board);
-}
-
-Board boardReset(Board board)
-{
-    if(!board.tile)
-        return boardAlloc(board);
-    for(int y = 0; y < board.len.y; y++){
-        for(int x = 0; x < board.len.x; x++){
-            board.tile[x][y].state = S_TILE;
-            board.tile[x][y].isBomb = false;
-            board.tile[x][y].num = 0;
-        }
-    }
-    board.state = BS_NEW;
-    return board;
-}
-
-Board boardChangeLen(Board board, const Length newLen)
-{
-    if(board.state != BS_NEW)
-        panic("Can only change len when board.state == BS_NEW");
-
-    if(board.tile && coordSame(board.len, newLen))
-        return board;
-    if(board.tile)
-        board = boardFree(board);
-    board.len = newLen;
-    return boardAlloc(board);
 }
 
 uint adjTileState(const Board board, const Coord pos, const TileState state)
@@ -129,62 +116,58 @@ uint adjTileState(const Board board, const Coord pos, const TileState state)
     return count;
 }
 
-Board boardAdj(Board board, Coord firstClick)
-{
-    uint attempt = 0;
-    do{
-        board = boardResetTiles(board);
-        board = boardRng(board, firstClick);
-        attempt++;
-    }while(!solvableAdj(board, firstClick) && attempt < 10000);
-    printf("attempts: %u\n", attempt);
-    return board;
-}
-
-Board boardInit(Board board, const Coord firstClick)
-{
-    //board = boardFree(board);
-    if(!validTilePos(firstClick, board.len))
-        panic("Firstclick invalid\nfirstclick: %i,%i\nboard.len: %i,%i\n",
-            firstClick.x, firstClick.y, board.len.x, board.len.y
-        );
-    const uint numTiles = board.len.x*board.len.y;
-    if(numTiles < board.numBombs+9)
-        panic("Need at least 3x3 non bomb tiles\nCan't fit %u bombs in %ix%i (%i) tiles!\n",
-            board.numBombs, board.len.x, board.len.y, board.len.x*board.len.y
-        );
-
-    board = boardAlloc(board);
-    board.
-
-    switch(board.type){
-        case B_RNG:
-            board = boardRng(board, firstClick);
-            break;
-        case B_ADJ:
-            board = boardAdj(board, firstClick);
-            break;
-        case B_SAT:
-        default:
-            usage();
-            break;
-    }
-
-    return board;
-}
+// Board boardAdj(Board board, Coord firstClick)
+// {
+//     uint attempt = 0;
+//     do{
+//         board = boardResetTiles(board);
+//         board = boardRng(board, firstClick);
+//         attempt++;
+//     }while(!solvableAdj(board, firstClick) && attempt < 10000);
+//     printf("attempts: %u\n", attempt);
+//     return board;
+// }
+//
+// Board boardInit(Board board, const Coord firstClick)
+// {
+//     //board = boardFree(board);
+//     if(!validTilePos(firstClick, board.len))
+//         panic("Firstclick invalid\nfirstclick: %i,%i\nboard.len: %i,%i\n",
+//             firstClick.x, firstClick.y, board.len.x, board.len.y
+//         );
+//     const uint numTiles = board.len.x*board.len.y;
+//     if(numTiles < board.numBombs+9)
+//         panic("Need at least 3x3 non bomb tiles\nCan't fit %u bombs in %ix%i (%i) tiles!\n",
+//             board.numBombs, board.len.x, board.len.y, board.len.x*board.len.y
+//         );
+//
+//     board = boardAlloc(board);
+//     board.
+//
+//     switch(board.type){
+//         case B_RNG:
+//             board = boardRng(board, firstClick);
+//             break;
+//         case B_ADJ:
+//             board = boardAdj(board, firstClick);
+//             break;
+//         case B_SAT:
+//         default:
+//             usage();
+//             break;
+//     }
+//
+//     return board;
+// }
 
 Board prop(Board board, const Coord pos)
 {
-    if(!board.bombsPlaced){
-        board = boardInit(board, pos);
-        board.bombsPlaced = true;
-        printBoard(board);
-    }
+    if(board.state != BS_PLAY)
+        panic("can only prop when board.state == BS_PLAY, board.state: %s", BoardStateStr[board.state]);
 
     if(!validTilePos(pos, board.len) || board.tile[pos.x][pos.y].state != S_TILE)
         return board;
 
-    board.tilesLeft -= board.tile[pos.x][pos.y].state == S_TILE;
     board.tile[pos.x][pos.y].state = S_NUM;
     if(board.tile[pos.x][pos.y].num > 0)
         return board;

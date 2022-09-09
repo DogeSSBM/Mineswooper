@@ -76,7 +76,7 @@ int clamp(const int n, const int min, const int max)
 
 bool inBound(const int n, const int min, const int max)
 {
-    return n >= min && n < max);
+    return n >= min && n < max;
 }
 
 bool inRange(const int n, const Range range)
