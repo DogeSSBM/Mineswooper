@@ -18,6 +18,7 @@
 #include <SDL2/SDL_image.h>
 
 #include "Types.h"
+#include "Panic.h"
 #include "Coords.h"
 #include "GetInt.h"
 #include "Colors.h"

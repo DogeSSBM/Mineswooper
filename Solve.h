@@ -25,7 +25,7 @@ uint clearAdj(Board *board, const Coord pos)
             if(coordSame(pos, adj) || !validTilePos(adj, board->len) || board->tile[adj.x][adj.y].state != S_TILE)
                 continue;
             if(board->tile[adj.x][adj.y].isBomb)
-                panic("Cleared adj bomb\n");
+                panic("Cleared adj bomb at: (%i,%i)\n", adj.x, adj.y);
             board->tile[adj.x][adj.y].state = S_NUM;
             cleared++;
         }
@@ -42,7 +42,10 @@ moar complicated shit
 
 */
 
+bool solvable(const Board original)
+{
 
+}
 
 bool solvableAdj(const Board original, const Coord firstClick)
 {
@@ -73,12 +76,12 @@ bool solvableAdj(const Board original, const Coord firstClick)
         tries = progress ? 3 : tries-1;
         printDecals(board);
         printf("tries: %u\n", tries);
-        int c;
-        do{
-            c = getchar();
-            if(c == 'q')
-                exit(0);
-        }while(c != '\n');
+        // int c;
+        // do{
+        //     c = getchar();
+        //     if(c == 'q')
+        //         exit(0);
+        // }while(c != '\n');
 
     }while(tries);
 

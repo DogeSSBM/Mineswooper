@@ -4,7 +4,7 @@
 void usage(void)
 {
     printf("Usage -\n");
-    printf("\t%s [Width,Height] [Num Bombs] [RNG|ADJ|SAT]\n\n", PROG_NAME);
+    printf("\t%s [Width,Height] [Num Bombs] [RNG|ADJ|SAT] [cheat]\n\n", PROG_NAME);
     printf("Default options are: 30,16 99 RNG\n");
     exit(EXIT_FAILURE);
 }
@@ -27,7 +27,7 @@ ArgType parseArgType(char *arg)
             return A_LEN;
         return A_MIN;
     }
-    return A_TYP;
+    return strlen(arg) == strlen("cheat") && strcmp(arg, "cheat") == 0 ? A_CHEAT : A_TYP;
 }
 
 Length parseLen(char *arg)
@@ -56,6 +56,53 @@ BoardType parseType(char *arg)
         return B_SAT;
     usage();
     return B_RNG;
+}
+
+Board boardArgs(int argc, char **argv)
+{
+    Board board = {
+        .len = iC(30, 16),
+        .numBombs = 99,
+        .state = BS_NEW
+    };
+
+    bool lenDone = false;
+    bool bombsDone = false;
+    bool typeDone = false;
+    bool cheatDone = false;
+    for(int i = 1; i < argc; i++){
+        switch(parseArgType(argv[i])){
+            case A_LEN:
+                if(lenDone)
+                    usage();
+                board.len = parseLen(argv[i]);
+                lenDone = true;
+                break;
+            case A_MIN:
+                if(bombsDone)
+                    usage();
+                board.numBombs = parseBombs(argv[i]);
+                bombsDone = true;
+                break;
+            case A_TYP:
+                if(typeDone)
+                    usage();
+                board.type = parseType(argv[i]);
+                typeDone = true;
+                break;
+            case A_CHEAT:
+                if(cheatDone)
+                    usage();
+                board.cheat = true;
+                cheatDone = true;
+                break;
+            default:
+                usage();
+                break;
+        }
+    }
+
+    return board;
 }
 
 #endif /* end of include guard: ARGS_H */

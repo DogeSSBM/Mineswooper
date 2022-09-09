@@ -1,14 +1,14 @@
 #ifndef CLICK_H
 #define CLICK_H
 
-Coord mouseTilePos(const Board board)
+Coord mouseTilePos(const uint scale, const Offset boardOff)
 {
-    return coordDiv(coordSub(mouse.pos, board.off), board.scale);
+    return coordDiv(coordSub(mouse.pos, boardOff), scale);
 }
 
-Coord tileMousePos(const Board board, const Coord tpos)
+Coord tileMousePos(const uint scale, const Offset boardOff, const Coord tpos)
 {
-    return coordOffset(coordMul(tpos, board.scale), board.off);
+    return coordOffset(coordMul(tpos, scale), boardOff);
 }
 
 ClickType clickInput(const Board board)
