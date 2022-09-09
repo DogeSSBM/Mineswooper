@@ -62,6 +62,38 @@ typedef struct{
 }Board;
 
 typedef enum{
+    M_LEN,
+    M_WIN,
+    M_MID,
+    M_SCALE,
+    M_OFF,
+    M_N
+}MetaInfType;
+const char *MetaInfTypeStr[M_N] = {
+    "M_LEN",
+    "M_WIN",
+    "M_MID",
+    "M_SCALE",
+    "M_OFF"
+};
+
+typedef struct{
+    Length len;
+    Length win;
+    Coord mid;
+    uint scale;
+    Offset off;
+    bool updated[M_N];
+    struct{
+        Length len;
+        Length win;
+        Coord mid;
+        uint scale;
+        Offset off;
+    }prv;
+}MetaInf;
+
+typedef enum{
     A_LEN,
     A_MIN,
     A_TYP,

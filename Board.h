@@ -72,33 +72,34 @@ Board boardReset(Board board)
     return board;
 }
 
-Board boardPlaceBombs(Board board, const Coord firstClick)
+Board* boardPlaceBombs(Board *board, const Coord firstClick)
 {
-    if(board.state != BS_NEW)
-        panic("can only boardPlaceBombs when board.state == BS_NEW, board.state: %s", BoardStateStr[board.state]);
-    board = boardReset(board);
-    board.lastClick = firstClick;
+    if(board->state != BS_NEW)
+        panic("can only boardPlaceBombs when board->state == BS_NEW, board->state: %s", BoardStateStr[board->state]);
+    *board = boardReset(*board);
+    board->lastClick = firstClick;
     for(Direction d = 0; d < 4; d++)
-        if(!validTilePos(coordShift(board.lastClick, d, 1), board.len))
-            board.lastClick = coordShift(board.lastClick, dirINV(d), 1);
+        if(!validTilePos(coordShift(board->lastClick, d, 1), board->len))
+            board->lastClick = coordShift(board->lastClick, dirINV(d), 1);
 
-    for(uint i = 0; i < board.numBombs; i++){
+    for(uint i = 0; i < board->numBombs; i++){
         Coord pos;
         do{
-            pos.x = rand()%board.len.x;
-            pos.y = rand()%board.len.y;
+            pos.x = rand()%board->len.x;
+            pos.y = rand()%board->len.y;
         }while(
-            board.tile[pos.x][pos.y].isBomb || (
-                inBound(pos.x, board.lastClick.x-1,board.lastClick.x+2) &&
-                inBound(pos.y, board.lastClick.y-1,board.lastClick.y+2)
+            board->tile[pos.x][pos.y].isBomb || (
+                inBound(pos.x, board->lastClick.x-1,board->lastClick.x+2) &&
+                inBound(pos.y, board->lastClick.y-1,board->lastClick.y+2)
             )
         );
-        board.tile[pos.x][pos.y].isBomb = true;
+        board->tile[pos.x][pos.y].isBomb = true;
     }
 
-    board.state = BS_PLAY;
-    boardCalcNums(board);
-    return prop(board, firstClick);
+    board->state = BS_PLAY;
+    boardCalcNums(*board);
+    *board = prop(*board, firstClick);
+    return board;
 }
 
 uint adjTileState(const Board board, const Coord pos, const TileState state)
