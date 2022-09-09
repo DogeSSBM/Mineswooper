@@ -49,7 +49,24 @@ void drawBoard(const Board board, const bool cheat)
         return;
     }
 
-    setTextSize(scale);
+    if(board.state == BS_LOOSE){
+        if(validTilePos(board.lastClick, board.len)){
+            fillSquareCoordResize(board.lastClick, scale, -2);
+            setColor(BLACK);
+            fillCircleCoord(coordOffset(board.lastClick, coordDiv(iC(scale, scale),2)), scale/3);
+            setColor(GREY);
+        }
+
+        setColor(GREY);
+        setTextColor(WHITE);
+        const Rect rect = rectify(
+            coordOffset(mid, coordDiv(getTextLength("New Game"), -2)),
+            getTextLength("New Game")
+        );
+        fillRectRect(rect);
+        drawTextCenteredCoord("New Game", mid);
+        return;
+    }
 
     for(int y = 0; y < board.len.y; y++){
         for(int x = 0; x < board.len.x; x++){
@@ -105,22 +122,6 @@ void drawBoard(const Board board, const bool cheat)
         }
     }
 
-    if(board.state == BS_LOOSE){
-
-        fillSquareCoordResize(pos, scale, -2);
-        setColor(BLACK);
-        fillCircleCoord(coordOffset(pos, coordDiv(iC(scale, scale),2)), scale/3);
-        setColor(GREY);
-
-        setColor(GREY);
-        setTextColor(WHITE);
-        const Rect rect = rectify(
-            coordOffset(mid, coordDiv(getTextLength("New Game"), -2)),
-            getTextLength("New Game")
-        );
-        fillRectRect(rect);
-        drawTextCenteredCoord("New Game", mid);
-    }
 }
 
 #endif /* end of include guard: DRAW_H */

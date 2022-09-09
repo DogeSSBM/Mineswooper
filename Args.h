@@ -61,9 +61,10 @@ BoardType parseType(char *arg)
 Board boardArgs(int argc, char **argv)
 {
     Board board = {
+        .lastClick = iC(-1,-1),
         .len = iC(30, 16),
         .numBombs = 99,
-        .state = BS_NEW
+        .state = BS_LOOSE
     };
 
     bool lenDone = false;

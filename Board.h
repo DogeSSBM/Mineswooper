@@ -10,8 +10,6 @@ Board boardFree(Board board)
     free(board.tile);
     board.tile = NULL;
     printf("Free'd board: {%i,%i}\n", board.len.x, board.len.y);
-    board.len.x = 0;
-    board.len.y = 0;
     return board;
 }
 
@@ -99,7 +97,8 @@ Board boardPlaceBombs(Board board, const Coord firstClick)
     }
 
     board.state = BS_PLAY;
-    return boardCalcNums(board);
+    boardCalcNums(board);
+    return prop(board, firstClick);
 }
 
 uint adjTileState(const Board board, const Coord pos, const TileState state)

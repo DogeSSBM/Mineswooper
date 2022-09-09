@@ -33,9 +33,6 @@ Board boardUpdate(Board board)
             mouseBtnReleased(MOUSE_L) &&
             coordInRect(mouse.pos, rect)
         ){
-            const Length len = board.len;
-            boardFree(board);
-            board.len = len;
             board = boardAlloc(board);
             board.state = BS_NEW;
             return board;
@@ -68,7 +65,7 @@ Board boardUpdate(Board board)
             board.lastClick = pos;
             if(board.tile[pos.x][pos.y].isBomb){
                 board.state = BS_LOOSE;
-                return board;
+                return boardFree(board);
             }else{
                 return prop(board, pos);
             }
