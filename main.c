@@ -7,11 +7,9 @@ int main(int argc, char **argv)
     Board board = boardArgs(argc, argv);
     while(1){
         const uint t = frameStart();
-        if(keyPressed(SDL_SCANCODE_ESCAPE))
-            exit(0);
 
         board = boardUpdate(board);
-        drawBoard(board, true);
+        drawBoard(board);
 
         frameEnd(t);
     }

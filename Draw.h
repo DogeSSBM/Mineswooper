@@ -25,7 +25,7 @@ void drawBoardBlank(const Length len, const uint scale, const Offset off)
     }
 }
 
-void drawBoard(const Board board, const bool cheat)
+void drawBoard(const Board board)
 {
     static const Color numColor[] = {
         {0x00, 0x00, 0xAA, 0xFF},
@@ -112,7 +112,7 @@ void drawBoard(const Board board, const bool cheat)
                     drawTextCenteredCoord("?",coordOffset(pos, (const Coord){.x=scale/2,.y=scale/2}));
                 }
 
-                if(board.tile[x][y].num > 0 && (board.tile[x][y].state == S_NUM || board.state == BS_LOOSE || (board.state == BS_PLAY && cheat))){
+                if(board.tile[x][y].num > 0 && (board.tile[x][y].state == S_NUM || board.state == BS_LOOSE || (board.state == BS_PLAY && board.cheat))){
                     setTextColor(numColor[board.tile[x][y].num - 1]);
                     char txt[2] = "0";
                     txt[0] = '0'+board.tile[x][y].num;

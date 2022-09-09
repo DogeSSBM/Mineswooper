@@ -21,12 +21,22 @@ Board boardUpdate(Board board)
     const Offset off = tileOffset(win, board.len, scale);
     const Coord pos = mouseTilePos(scale, off);
 
+    if(keyPressed(SDL_SCANCODE_ESCAPE)){
+        printf("Escape pressed, freeing board and exiting\n");
+        board = boardFree(board);
+        exit(0);
+    }
+
     if(mouseBtnPressed(MOUSE_L))
         down[0] = pos;
     if(mouseBtnPressed(MOUSE_R))
         down[1] = pos;
 
     if(board.state == BS_LOOSE){
+        if(keyReleased(SDL_SCANCODE_SPACE)){
+            board.cheat = !board.cheat;
+            printf("board.cheat = %s\n", board.cheat?"true":"false");
+        }
         const Length txtlen = iC(strlen(" New Game ")*scale, scale);
         const Rect rect = rectify(coordSub(mid, coordDiv(txtlen,2)), txtlen);
         if(
@@ -74,8 +84,8 @@ Board boardUpdate(Board board)
         if(
             mouseBtnReleased(MOUSE_R) &&
             validTilePos(pos, board.len) &&
-            validTilePos(down[0], board.len) &&
-            coordSame(down[0], pos) &&
+            validTilePos(down[1], board.len) &&
+            coordSame(down[1], pos) &&
             !mouseBtnState(MOUSE_L)
         ){
             printf("MOUSE_R -\n\tpos: (%i,%i)\n\tmpos: (%i,%i)\n", pos.x, pos.y, mouse.pos.x, mouse.pos.y);
