@@ -14,8 +14,8 @@ Offset tileOffset(const Length win, const Length len, const uint scale)
 
 void drawBoardBlank(const Length len, const uint scale, const Offset off)
 {
-    for(int y = 0; y < board.len.y; y++){
-        for(int x = 0; x < board.len.x; x++){
+    for(int y = 0; y < len.y; y++){
+        for(int x = 0; x < len.x; x++){
             const Coord pos = tileMousePos(scale, off, iC(x,y));
             setColor(GREY1);
             fillSquareCoordResize(pos, scale, -1);

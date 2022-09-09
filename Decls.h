@@ -19,7 +19,7 @@ Board boardFit(Board);
 Board boardFree(Board);
 Board boardAlloc(Board);
 void drawBoom(const Board, const Coord);
-Board drawBoard(const Board);
+void drawBoard(const Board, const bool);
 bool validTilePos(const Coord, const Coord);
 bool inArr(const uint, uint *, const uint);
 uint adjTileState(const Board, const Coord, const TileState);
@@ -30,8 +30,8 @@ Board boardArgs(int, char **);
 Board prop(Board, const Coord);
 
 // Click.h
-Coord mouseTilePos(const Board);
-Coord tileMousePos(const Board, const Coord);
+Coord mouseTilePos(const uint, const Offset);
+Coord tileMousePos(const uint, const Offset, const Coord);
 ClickType clickInput(const Board);
 
 // Solve.h

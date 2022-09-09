@@ -19,7 +19,7 @@ Board boardUpdate(Board board)
     const Coord mid = getWindowMid();
     const uint scale = tileScale(win, board.len);
     const Offset off = tileOffset(win, board.len, scale);
-    const Coord pos = mouseTilePos(scale, off)
+    const Coord pos = mouseTilePos(scale, off);
 
     if(mouseBtnPressed(MOUSE_L))
         down[0] = pos;
@@ -27,7 +27,7 @@ Board boardUpdate(Board board)
         down[1] = pos;
 
     if(board.state == BS_LOOSE){
-        const Length txtlen = (strlen(" New Game ")*scale, scale);
+        const Length txtlen = iC(strlen(" New Game ")*scale, scale);
         const Rect rect = rectify(coordSub(mid, coordDiv(txtlen,2)), txtlen);
         if(
             mouseBtnReleased(MOUSE_L) &&
@@ -43,7 +43,7 @@ Board boardUpdate(Board board)
         board.len = iC(
             imax(4, board.len.x+keyPressed(SDL_SCANCODE_RIGHT)-keyPressed(SDL_SCANCODE_LEFT)),
             imax(4, board.len.y+keyPressed(SDL_SCANCODE_DOWN)-keyPressed(SDL_SCANCODE_UP))
-        );;
+        );
     }
 
     if(board.state == BS_NEW){
@@ -53,10 +53,10 @@ Board boardUpdate(Board board)
             validTilePos(down[0], board.len) &&
             coordSame(down[0], pos)
         )
-            return boardPlaceBombs(board, firstClick);
+            return boardPlaceBombs(board, pos);
     }
 
-    if(board.state = BS_PLAY){
+    if(board.state == BS_PLAY){
         if(
             mouseBtnReleased(MOUSE_L) &&
             validTilePos(pos, board.len) &&
@@ -87,20 +87,6 @@ Board boardUpdate(Board board)
                     board.tile[pos.x][pos.y].state = S_TILE;
                 return board;
             }
-        }
-    }
-    return board;
-}
-
-Board boardResize(Board board)
-{
-
-
-        if(!coordSame(newLen, board.len)){
-            board = boardFree(board);
-            board.len = newLen;
-            board = boardAlloc(board);
-            board = boardFit(board);
         }
     }
     return board;
