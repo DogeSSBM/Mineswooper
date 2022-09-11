@@ -23,11 +23,6 @@ uint flagAdj(Board *board, const Coord pos)
 
 uint clearAdj(Board *board, const Coord pos)
 {
-    // printDecalsPos(*board, pos);
-    // printf("adj flags: %u tiles:%u\n\n",
-    //     adjTileState(*board, pos, S_FLAG),
-    //     adjTileState(*board, pos, S_TILE)
-    // );
     uint cleared = 0;
     for(int yo = -1; yo <= 1; yo++){
         for(int xo = -1; xo <= 1; xo++){

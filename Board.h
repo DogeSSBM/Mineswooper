@@ -117,6 +117,8 @@ Board* boardPlaceBombs(Board *board, const Coord firstClick)
 
     uint i = 0;
     do{
+        if(i > 50000)
+            panic(">50000");
         i++;
         boardCalcNums(boardRngBombs(board));
         board->state = BS_PLAY;
