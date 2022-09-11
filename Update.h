@@ -64,11 +64,13 @@ MetaInf boardUpdate(Board *board, MetaInf inf)
     switch(board->state){
         case BS_LOOSE:
             ;
-            const Length txtlen = iC(strlen(" New Game ")*inf.scale, inf.scale);
-            const Rect rect = rectify(coordSub(inf.mid, coordDiv(txtlen,2)), txtlen);
+            const Rect rect = rectify(
+                inf.mid,
+                iC(strlen(" New Game ")*inf.scale, inf.scale)
+            );
             if(
                 mouseBtnReleased(MOUSE_L) &&
-                coordInRect(mouse.pos, rect)
+                coordInRect(mouse.pos, rectOffset(rect, iC(-rect.w/2, -rect.h/2)))
             ){
                 *board = boardAlloc(*board);
                 board->state = BS_NEW;
@@ -84,6 +86,14 @@ MetaInf boardUpdate(Board *board, MetaInf inf)
                 boardPlaceBombs(board, pos);
             break;
         case BS_PLAY:
+            if(keyReleased(SDL_SCANCODE_R)){
+                if(keyState(SDL_SCANCODE_LCTRL) || keyState(SDL_SCANCODE_RCTRL))
+                    *board = boardReset(*board);
+                else
+                    *board = boardRestart(*board);
+                break;
+            }
+
             if(
                 mouseBtnReleased(MOUSE_L) &&
                 validTilePos(pos, board->len) &&

@@ -72,6 +72,20 @@ Board boardReset(Board board)
     return board;
 }
 
+Board boardRestart(Board board)
+{
+    if(!board.tile)
+        panic("Cant boardRestart when board.tiles == NULL");
+
+    printf("Restarting board\n");
+    for(int y = 0; y < board.len.y; y++)
+        for(int x = 0; x < board.len.x; x++)
+            board.tile[x][y].state = S_TILE;
+
+    board.state = BS_PLAY;
+    return board;
+}
+
 Board* boardPlaceBombs(Board *board, const Coord firstClick)
 {
     if(board->state != BS_NEW)

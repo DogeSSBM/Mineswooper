@@ -42,11 +42,6 @@
 //
 // */
 //
-// bool solvable(const Board original)
-// {
-//
-// }
-//
 // bool solvableAdj(const Board original, const Coord firstClick)
 // {
 //     Board board = original;
@@ -87,6 +82,21 @@
 //
 //     boardFree(board);
 //     return !board.tilesLeft;
+// }
+//
+//
+//
+// bool solvable(Board board)
+// {
+//     switch(original.type){
+//         case B_RNG:
+//             return true;
+//         case B_ADJ:
+//             do{
+//                 Board board = original;
+//
+//             }
+//     }
 // }
 //
 // #endif /* end of include guard: SOLVE_H */
