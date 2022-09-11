@@ -34,7 +34,6 @@ void printDecals(const Board board)
         }
         putchar('\n');
     }
-    putchar('\n');
 }
 
 void printDecalsPos(const Board board, const Coord pos)
@@ -54,7 +53,6 @@ void printDecalsPos(const Board board, const Coord pos)
         }
         putchar('\n');
     }
-    putchar('\n');
 }
 
 #endif /* end of include guard: PRINT_H */

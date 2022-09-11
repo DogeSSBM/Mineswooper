@@ -110,7 +110,7 @@ MetaInf boardUpdate(Board *board, MetaInf inf)
                     board->state = BS_LOOSE;
                     *board = boardFree(*board);
                 }else{
-                    *board =  prop(*board, pos);
+                    printf("cleared %u tiles\n", prop(board, pos));
                 }
             }
 

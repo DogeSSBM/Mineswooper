@@ -15,13 +15,17 @@ Board boardFree(Board board);
 Board boardAlloc(Board board);
 bool validTilePos(const Coord pos, const Length bounds);
 uint adjBombs(const Board board, const Coord pos);
-Board boardCalcNums(Board board);
+Board* boardCalcNums(Board *board);
 Board boardReset(Board board);
 Board* boardPlaceBombs(Board *board, const Coord firstClick);
 uint adjTileState(const Board board, const Coord pos, const TileState state);
-Board prop(Board board, const Coord pos);
+uint prop(Board *board, const Coord pos);
 
 // SOLVE_H
+uint flagAdj(Board *board, const Coord pos);
+uint clearAdj(Board *board, const Coord pos);
+bool solvableAdj(Board *board);
+bool solvable(Board *board);
 
 // UPDATE_H
 Coord mouseTilePos(const uint scale, const Offset boardOff);

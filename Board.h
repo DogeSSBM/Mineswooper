@@ -47,11 +47,11 @@ uint adjBombs(const Board board, const Coord pos)
     return count;
 }
 
-Board boardCalcNums(Board board)
+Board* boardCalcNums(Board *board)
 {
-    for(int y = 0; y < board.len.y; y++){
-        for(int x = 0; x < board.len.x; x++){
-            board.tile[x][y].num = adjBombs(board, iC(x,y));
+    for(int y = 0; y < board->len.y; y++){
+        for(int x = 0; x < board->len.x; x++){
+            board->tile[x][y].num = adjBombs(*board, iC(x,y));
         }
     }
     return board;
@@ -86,16 +86,9 @@ Board boardRestart(Board board)
     return board;
 }
 
-Board* boardPlaceBombs(Board *board, const Coord firstClick)
+Board* boardRngBombs(Board *board)
 {
-    if(board->state != BS_NEW)
-        panic("can only boardPlaceBombs when board->state == BS_NEW, board->state: %s", BoardStateStr[board->state]);
     *board = boardReset(*board);
-    board->lastClick = firstClick;
-    for(Direction d = 0; d < 4; d++)
-        if(!validTilePos(coordShift(board->lastClick, d, 1), board->len))
-            board->lastClick = coordShift(board->lastClick, dirINV(d), 1);
-
     for(uint i = 0; i < board->numBombs; i++){
         Coord pos;
         do{
@@ -109,10 +102,30 @@ Board* boardPlaceBombs(Board *board, const Coord firstClick)
         );
         board->tile[pos.x][pos.y].isBomb = true;
     }
+    return board;
+}
 
+Board* boardPlaceBombs(Board *board, const Coord firstClick)
+{
+    if(board->state != BS_NEW)
+        panic("can only boardPlaceBombs when board->state == BS_NEW, board->state: %s", BoardStateStr[board->state]);
+    *board = boardReset(*board);
+    board->lastClick = firstClick;
+    for(Direction d = 0; d < 4; d++)
+        if(!validTilePos(coordShift(board->lastClick, d, 1), board->len))
+            board->lastClick = coordShift(board->lastClick, dirINV(d), 1);
+
+    uint i = 0;
+    do{
+        i++;
+        boardCalcNums(boardRngBombs(board));
+        board->state = BS_PLAY;
+        prop(board, board->lastClick);
+    }while(board->type != B_RNG && !solvable(board));
+    *board = boardRestart(*board);
     board->state = BS_PLAY;
-    boardCalcNums(*board);
-    *board = prop(*board, firstClick);
+    printf("%u tries\n", i);
+    printf("cleared %u tiles\n", prop(board, board->lastClick));
     return board;
 }
 
@@ -122,40 +135,55 @@ uint adjTileState(const Board board, const Coord pos, const TileState state)
     for(int yo = -1; yo <= 1; yo++){
         for(int xo = -1; xo <= 1; xo++){
             const Coord adj = {.x = pos.x+xo, .y = pos.y+yo};
-            const bool same = validTilePos(adj, board.len) && !coordSame(pos, adj) && board.tile[adj.x][adj.y].state == state;
-            count += state == S_NUM ? same && board.tile[adj.x][adj.y].num : same;
-
+            count += (
+                !coordSame(pos, adj) &&
+                validTilePos(adj, board.len) &&
+                board.tile[adj.x][adj.y].state == state
+            );
         }
     }
     return count;
 }
 
-Board prop(Board board, const Coord pos)
+uint prop(Board *board, const Coord pos)
 {
-    if(board.state != BS_PLAY)
-        panic("can only prop when board.state == BS_PLAY, board.state: %s", BoardStateStr[board.state]);
+    if(board->state != BS_PLAY)
+        panic(
+            "can only prop when board->state == BS_PLAY, board->state: %s",
+            BoardStateStr[board->state]
+        );
 
-    if(!validTilePos(pos, board.len) || board.tile[pos.x][pos.y].state != S_TILE)
-        return board;
+    if(!validTilePos(pos, board->len) || board->tile[pos.x][pos.y].state != S_TILE)
+        return 0;
 
-    board.tile[pos.x][pos.y].state = S_NUM;
-    if(board.tile[pos.x][pos.y].num > 0)
-        return board;
+    uint cleared = board->tile[pos.x][pos.y].state == S_TILE;
+    board->tile[pos.x][pos.y].state = S_NUM;
+    if(board->tile[pos.x][pos.y].num > 0)
+        return cleared;
 
     for(int yo = -1; yo <= 1; yo++){
         for(int xo = -1; xo <= 1; xo++){
             const Coord adj = {.x = pos.x+xo, .y = pos.y+yo};
             if(
                 coordSame(pos, adj) ||
-                !validTilePos(adj, board.len) ||
-                board.tile[adj.x][adj.y].state != S_TILE
+                !validTilePos(adj, board->len) ||
+                board->tile[adj.x][adj.y].state != S_TILE
             )
                 continue;
-            board = prop(board, adj);
+            cleared += prop(board, adj);
         }
     }
 
-    return board;
+    return cleared;
+}
+
+uint boardRemaining(const Board board)
+{
+    uint total = 0;
+    for(int y = 0; y < board.len.y; y++)
+        for(int x = 0; x < board.len.x; x++)
+            total += board.tile[x][y].state != S_NUM;
+    return total - board.numBombs;
 }
 
 #endif /* end of include guard: BOARD_H */
