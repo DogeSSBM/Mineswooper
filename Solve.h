@@ -1,6 +1,33 @@
 #ifndef SOLVE_H
 #define SOLVE_H
 
+bool clear121(Board *board, const Coord pos)
+{
+    for(uint i = 0; i < 2; i++){
+        const Coord a = coordShift(pos, i,  1);
+        const Coord b = coordShift(pos, i, -1);
+        if(
+            validTilePos(a, board->len) &&
+            board->tile[a.x][a.y].state == S_NUM &&
+            board->tile[a.x][a.y].num == 1
+            &&
+            validTilePos(b, board->len) &&
+            board->tile[b.x][b.y].state == S_NUM &&
+            board->tile[b.x][b.y].num == 1
+        ){
+            const Coord perpR = coordShift(pos, dirROR(i), 1);
+            const Coord perpL = coordShift(pos, dirROL(i), 1);
+            if(validTilePos(perpR, board->len) && board->tile[perpR.x][perpR.y].state == S_TILE)
+                board->tile[perpR.x][perpR.y].state = S_NUM;
+            else
+                board->tile[perpL.x][perpL.y].state = S_NUM;
+            return true;
+        }
+    }
+    return false;
+}
+
+
 uint flagAdj(Board *board, const Coord pos)
 {
     uint flagged = 0;
@@ -43,16 +70,7 @@ uint clearAdj(Board *board, const Coord pos)
     return cleared;
 }
 
-/*
-while progress
-    trivial flags
-    trivial clears
-
-moar complicated shit
-
-*/
-
-bool solvableAdj(Board *board)
+bool solve(Board *board, const bool patterns)
 {
     uint tries = 3;
     do{
@@ -68,6 +86,9 @@ bool solvableAdj(Board *board)
 
                     if(adjTileState(*board, pos, S_FLAG) == board->tile[x][y].num)
                         progress |= clearAdj(board, pos);
+
+                    if(patterns && board->tile[x][y].num == 2)
+                        progress |= clear121(board, pos);
                 }
             }
         }
@@ -83,9 +104,9 @@ bool solvable(Board *board)
         return true;
 
     if(board->type == B_ADJ)
-        return solvableAdj(board);
+        return solve(board, false);
 
-    return true;
+    return solve(board, true);
 }
 
 #endif /* end of include guard: SOLVE_H */
