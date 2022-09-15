@@ -124,8 +124,8 @@ Board* boardPlaceBombs(Board *board, const Coord firstClick)
         prop(boardCalcNums(boardRngBombs(board)), board->lastClick);
     }while(board->type != B_RNG && !solvable(board));
     printf("%u tries\n", i);
-    // printBoard(*board);
-    // printDecals(*board);
+    printBoard(*board);
+    printDecals(*board);
     board = boardRestart(board);
     printf("cleared %u tiles\n", prop(board, board->lastClick));
     const uint left = boardRemaining(*board);
