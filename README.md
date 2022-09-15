@@ -11,10 +11,14 @@ Will result in a 40 tile wide, by 32 tile high board.
 
 The default board length is 30,16 (30 tiles wide, by 16 tiles high).
 
-When on the "New Game" screen, you can resize the board using WASD / arrow keys.
+When on the "New Game" screen, you can resize the board using WASD / arrow keys -
+
 `W` / `Arrow Up`: Decrease Height
+
 `S` / `Arrow Down`: Increase Height
+
 `A` / `Arrow Left`: Decrease Width
+
 `D` / `Arrow Right`: Increase Width
 
 ## Number of Mines
