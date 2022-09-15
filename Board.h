@@ -118,8 +118,8 @@ Board* boardPlaceBombs(Board *board, const Coord firstClick)
 
     uint i = 0;
     do{
-        if(i > 10000)
-            panic(">10000");
+        if(i > 10000000)
+            panic(">10000000");
         ++i;
         if((i-1)/100 != i/100)
             printf("try: %u\n", i);

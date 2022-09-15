@@ -31,6 +31,14 @@ bool solvable(Board *board);
 // UPDATE_H
 Coord mouseTilePos(const uint scale, const Offset boardOff);
 Coord tileMousePos(const uint scale, const Offset boardOff, const Coord tpos);
+void checkQuit(Board *board);
+bool checkCheat(const bool cheat);
+bool checkLen(Board* board);
+bool checkNewGame(Board *board, const Coord mid, const uint scale);
+bool checkPlaceBombs(Board *board, const Coord pos, const Coord downPos);
+bool checkRestart(Board *board);
+bool checkClick(Board *board, const Coord pos, const Coord downPos);
+bool checkRight(Board *board, const Coord pos, const Coord downPos);
 uint boardUpdate(Board *board);
 
 // PRINT_H

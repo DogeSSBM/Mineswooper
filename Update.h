@@ -96,6 +96,10 @@ bool checkPlaceBombs(Board *board, const Coord pos, const Coord downPos)
 
 bool checkRestart(Board *board)
 {
+    if(keyReleased(SDL_SCANCODE_T)){
+        *board = boardReset(*board);
+        return true;
+    }
     if(keyReleased(SDL_SCANCODE_R)){
         if(keyState(SDL_SCANCODE_LCTRL) || keyState(SDL_SCANCODE_RCTRL))
             *board = boardReset(*board);
@@ -147,6 +151,54 @@ bool checkRight(Board *board, const Coord pos, const Coord downPos)
     return false;
 }
 
+bool checkBombNum(Board *board)
+{
+    if(mouseScrolled(MW_U)){
+        board->numBombs = imax(1, board->numBombs-1);
+        return true;
+    }
+    if(mouseScrolled(MW_D)){
+        board->numBombs++;
+        return true;
+    }
+    return false;
+}
+
+bool checkSave(Board *board)
+{
+    if(!(
+        keyReleased(SDL_SCANCODE_S) &&
+        (keyState(SDL_SCANCODE_LCTRL) || keyState(SDL_SCANCODE_RCTRL))
+    ) && !(
+        (keyReleased(SDL_SCANCODE_LCTRL) || keyReleased(SDL_SCANCODE_RCTRL)) &&
+        keyState(SDL_SCANCODE_S)
+    ))
+        return false;
+
+    for(uint i = 0; i < ~0u; i++){
+        char path[64] = {0};
+        sprintf(path, "./Saves/%u.swoop", i);
+        printf("Checking if \"%s\" exists\n", path);
+        File *file = fopen(path, "r");
+        if(file){
+            printf("It does\n");
+            fclose(file);
+        }else{
+            printf("It doesn't\n");
+            file = fopen(path, "w");
+            for(int y = 0; y < board->len.y; y++){
+                for(int x = 0; x < board->len.x; x++){
+                    fputc(board->tile[x][y].isBomb ? 'B' : '0'+board->tile[x][y].num, file);
+                }
+                fputc('\n', file);
+            }
+            fclose(file);
+            break;
+        }
+    }
+    return true;
+}
+
 uint boardUpdate(Board *board)
 {
     static Coord down[2] = {0};
@@ -172,6 +224,8 @@ uint boardUpdate(Board *board)
     switch(board->state){
         case BS_WIN:
         case BS_LOOSE:
+            if(checkSave(board))
+                printf("Saved board\n");
             board->cheat = checkCheat(board->cheat);
             if(checkLen(board) || windowResized()){
                 win = getWindowLen();
@@ -179,6 +233,9 @@ uint boardUpdate(Board *board)
                 scale = tileScale(win, board->len);
                 off = tileOffset(win, board->len, scale);
             }
+
+            if(checkBombNum(board))
+                printf("Setting numBombs: %u\n", board->numBombs);
             if(checkNewGame(board, mid, scale))
                 printf("Starting new game!\n");
             break;
@@ -190,6 +247,9 @@ uint boardUpdate(Board *board)
                 );
             break;
         case BS_PLAY:
+            if(checkSave(board))
+                printf("Saved board\n");
+
             if(checkRestart(board))
                 printf("Fresh board\n");
 
