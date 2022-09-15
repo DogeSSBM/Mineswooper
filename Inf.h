@@ -33,15 +33,15 @@ MetaInf updateInf(MetaInf inf)
 MetaInf infBoard(const Board board)
 {
     const Length win = getWindowLen();
-    return updateInf(
-        (const MetaInf){
-            .len = board.len,
-            .win = win,
-            .mid = coordDiv(win,2),
-            .scale = tileScale(win, board.len),
-            .off = tileOffset(win, board.len, tileScale(win, board.len))
-        }
-    );
+    const MetaInf inf = {
+        .len = board.len,
+        .win = win,
+        .mid = coordDiv(win,2),
+        .scale = tileScale(win, board.len),
+        .off = tileOffset(win, board.len, tileScale(win, board.len))
+    };
+    setTextSize(inf.scale);
+    return updateInf(inf);
 }
 
 

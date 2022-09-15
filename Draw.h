@@ -46,35 +46,8 @@ void drawBoard(const Board board, const MetaInf inf)
         return;
     }
 
-    if(board.state == BS_LOOSE || board.state == BS_WIN){
-        if(board.tile == NULL)
-            drawBoardBlank(board.len, inf.scale, inf.off);
-
-
-        setColor(GREY);
-        setTextColor(WHITE);
-        const Length textlen = iC(strlen(" New Game ")*inf.scale, inf.scale);
-        const Rect rect = rectify(
-            coordOffset(inf.mid, coordDiv(textlen, -2)),
-            textlen
-        );
-        fillRectRect(rect);
-        drawTextCenteredCoord(" New Game ", inf.mid);
-
-        if(board.tile == NULL)
-            return;
-
-        if(board.state == BS_LOOSE){
-
-            if(validTilePos(board.lastClick, board.len)){
-                fillSquareCoordResize(board.lastClick, inf.scale, -2);
-                setColor(BLACK);
-                fillCircleCoord(coordOffset(board.lastClick, coordDiv(iC(inf.scale, inf.scale),2)), inf.scale/3);
-                setColor(GREY);
-            }
-        }
-    }
-
+    if(board.tile == NULL)
+        goto after;
     for(int y = 0; y < board.len.y; y++){
         for(int x = 0; x < board.len.x; x++){
             const Coord pos = tileMousePos(inf.scale, inf.off, iC(x,y));
@@ -94,14 +67,16 @@ void drawBoard(const Board board, const MetaInf inf)
                 setColor(GREY2);
                 fillSquareCoordResize(pos, inf.scale, -1 -(inf.scale/8));
 
-                if(!board.tile[x][y].isBomb && board.tile[x][y].num > 0 && (board.cheat || board.state == BS_LOOSE)){
-                    setTextColor(numColor[board.tile[x][y].num - 1]);
-                    char txt[2] = "0";
-                    txt[0] = '0'+board.tile[x][y].num;
-                    drawTextCenteredCoord(txt, coordOffset(pos, iC(inf.scale/2, inf.scale/2)));
-                }else if(board.tile[x][y].isBomb && (board.cheat || board.state == BS_LOOSE)){
-                    setTextColor(BLACK);
-                    drawTextCenteredCoord("B", coordOffset(pos, iC(inf.scale/2, inf.scale/2)));
+                if(board.cheat || board.state == BS_LOOSE){
+                    if(board.tile[x][y].isBomb){
+                        setTextColor(BLACK);
+                        drawTextCenteredCoord("B", coordOffset(pos, iC(inf.scale/2, inf.scale/2)));
+                    }else if(board.tile[x][y].num > 0){
+                        setTextColor(numColor[board.tile[x][y].num - 1]);
+                        char txt[2] = "0";
+                        txt[0] = '0'+board.tile[x][y].num;
+                        drawTextCenteredCoord(txt, coordOffset(pos, iC(inf.scale/2, inf.scale/2)));
+                    }
                 }
 
                 if(board.tile[x][y].state == S_FLAG){
@@ -131,6 +106,35 @@ void drawBoard(const Board board, const MetaInf inf)
                         coordOffset(pos, (const Coord){.x=inf.scale/2,.y=inf.scale/2})
                     );
                 }
+            }
+        }
+    }
+    after:
+    if(board.state == BS_LOOSE || board.state == BS_WIN){
+        if(board.tile == NULL)
+            drawBoardBlank(board.len, inf.scale, inf.off);
+
+
+        setColor(GREY);
+        setTextColor(WHITE);
+        const Length textlen = iC(strlen(" New Game ")*inf.scale, inf.scale);
+        const Rect rect = rectify(
+            coordOffset(inf.mid, coordDiv(textlen, -2)),
+            textlen
+        );
+        fillRectRect(rect);
+        drawTextCenteredCoord(" New Game ", inf.mid);
+
+        if(board.tile == NULL)
+            return;
+
+        if(board.state == BS_LOOSE){
+
+            if(validTilePos(board.lastClick, board.len)){
+                fillSquareCoordResize(board.lastClick, inf.scale, -2);
+                setColor(BLACK);
+                fillCircleCoord(coordOffset(board.lastClick, coordDiv(iC(inf.scale, inf.scale),2)), inf.scale/3);
+                setColor(GREY);
             }
         }
     }

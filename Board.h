@@ -118,10 +118,11 @@ Board* boardPlaceBombs(Board *board, const Coord firstClick)
 
     uint i = 0;
     do{
-        if(i > 50000)
-            panic(">50000");
-        i++;
-        printf("try: %u\n", i);
+        if(i > 10000)
+            panic(">10000");
+        ++i;
+        if((i-1)/100 != i/100)
+            printf("try: %u\n", i);
         floodFill(boardCalcNums(boardRngBombs(board)), board->lastClick);
     }while(board->type != B_RNG && !solvable(board));
     printf("%u tries\n", i);
