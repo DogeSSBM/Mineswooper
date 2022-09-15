@@ -6,19 +6,22 @@ typedef enum{
     S_TILE,
     S_FLAG,
     S_QEST,
+    S_QEST_SAFE,
     S_N
 }TileState;
 const char *TileStateStr[S_N] = {
     " NUM",
     "TILE",
     "FLAG",
-    "QEST"
+    "QEST",
+    "S_QEST_SAFE",
 };
 const char TileStateChar[S_N] = {
     ' ',
     '#',
     '>',
-    '?'
+    '?',
+    'S'
 };
 
 typedef struct{

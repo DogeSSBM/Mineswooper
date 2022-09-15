@@ -135,7 +135,7 @@ MetaInf boardUpdate(Board *board, MetaInf inf)
                     pos.x, pos.y, mouse.pos.x, mouse.pos.y
                 );
                 if(board->tile[pos.x][pos.y].state != S_NUM){
-                    if(++board->tile[pos.x][pos.y].state == S_N)
+                    if(++board->tile[pos.x][pos.y].state >= S_QEST_SAFE)
                         board->tile[pos.x][pos.y].state = S_TILE;
                     if(board->tile[pos.x][pos.y].state == S_FLAG)
                         printf("Flagged: %u / %u\n", boardNumState(*board, S_FLAG), board->numBombs);

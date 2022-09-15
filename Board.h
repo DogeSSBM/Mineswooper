@@ -162,7 +162,14 @@ uint prop(Board *board, const Coord pos)
 
     if(!validTilePos(pos, board->len) || board->tile[pos.x][pos.y].state != S_TILE)
         return 0;
-
+    if(board->tile[pos.x][pos.y].isBomb){
+        printBoard(*board);
+        printf("\n");
+        printDecals(*board);
+        printf("\n");
+        printDecalsPos(*board, pos);
+        panic("tried to prop bomb at %i,%i\n", pos.x, pos.y);
+    }
     uint cleared = board->tile[pos.x][pos.y].state == S_TILE;
     board->tile[pos.x][pos.y].state = S_NUM;
     if(board->tile[pos.x][pos.y].num > 0)
