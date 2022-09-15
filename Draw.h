@@ -48,7 +48,7 @@ void drawBoard(const Board board, const MetaInf inf)
 
     if(board.state == BS_LOOSE){
         drawBoardBlank(board.len, inf.scale, inf.off);
-        
+
         if(validTilePos(board.lastClick, board.len)){
             fillSquareCoordResize(board.lastClick, inf.scale, -2);
             setColor(BLACK);
@@ -87,6 +87,16 @@ void drawBoard(const Board board, const MetaInf inf)
                 setColor(GREY2);
                 fillSquareCoordResize(pos, inf.scale, -1 -(inf.scale/8));
 
+                if(board.tile[x][y].num > 0 && (board.cheat || board.state == BS_LOOSE)){
+                    setTextColor(numColor[board.tile[x][y].num - 1]);
+                    char txt[2] = "0";
+                    txt[0] = '0'+board.tile[x][y].num;
+                    drawTextCenteredCoord(txt, coordOffset(pos, iC(inf.scale/2, inf.scale/2)));
+                }else if(board.tile[x][y].isBomb && (board.cheat || board.state == BS_LOOSE)){
+                    setTextColor(BLACK);
+                    drawTextCenteredCoord("O", coordOffset(pos, iC(inf.scale/2, inf.scale/2)));
+                }
+
                 if(board.tile[x][y].state == S_FLAG){
                     const uint t1 = inf.scale/3;
                     const uint t2 = t1*2;
@@ -112,21 +122,6 @@ void drawBoard(const Board board, const MetaInf inf)
                     drawTextCenteredCoord(
                         "?",
                         coordOffset(pos, (const Coord){.x=inf.scale/2,.y=inf.scale/2})
-                    );
-                }
-
-                if(
-                    board.tile[x][y].num > 0 &&
-                    (board.tile[x][y].state == S_NUM ||
-                    board.state == BS_LOOSE ||
-                    (board.state == BS_PLAY && board.cheat))
-                ){
-                    setTextColor(numColor[board.tile[x][y].num - 1]);
-                    char txt[2] = "0";
-                    txt[0] = '0'+board.tile[x][y].num;
-                    drawTextCenteredCoord(
-                        txt,
-                        coordOffset(pos, iC(inf.scale/2, inf.scale/2))
                     );
                 }
             }

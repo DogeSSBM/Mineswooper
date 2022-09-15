@@ -26,6 +26,7 @@ Board boardAlloc(Board board)
             board.tile[x][y].state = S_TILE;
     }
     printf("Allocating new board: {%i,%i}\n", board.len.x, board.len.y);
+    printf("Bombs: %u\n", board.numBombs);
 
     return board;
 }
