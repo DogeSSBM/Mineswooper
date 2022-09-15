@@ -37,6 +37,7 @@ uint boardUpdate(Board *board);
 void printBoard(const Board board);
 void printDecals(const Board board);
 void printDecalsPos(const Board board, const Coord pos);
+uint printCleared(const uint cleared);
 
 // DRAW_H
 uint tileScale(const Length win, const Length len);

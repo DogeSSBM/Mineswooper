@@ -55,4 +55,11 @@ void printDecalsPos(const Board board, const Coord pos)
     }
 }
 
+uint printCleared(const uint cleared)
+{
+    if(cleared)
+        printf("Cleared %u tiles.\n", cleared);
+    return cleared;
+}
+
 #endif /* end of include guard: PRINT_H */

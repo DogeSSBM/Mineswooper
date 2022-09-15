@@ -80,6 +80,73 @@ bool checkNewGame(Board *board, const Coord mid, const uint scale)
     return false;
 }
 
+bool checkPlaceBombs(Board *board, const Coord pos, const Coord downPos)
+{
+    if(
+        mouseBtnReleased(MOUSE_L) &&
+        validTilePos(pos, board->len) &&
+        validTilePos(downPos, board->len) &&
+        coordSame(downPos, pos)
+    ){
+        boardPlaceBombs(board, pos);
+        return true;
+    }
+    return false;
+}
+
+bool checkRestart(Board *board)
+{
+    if(keyReleased(SDL_SCANCODE_R)){
+        if(keyState(SDL_SCANCODE_LCTRL) || keyState(SDL_SCANCODE_RCTRL))
+            *board = boardReset(*board);
+        else
+            board = boardRestart(board);
+        return true;
+    }
+    return false;
+}
+
+bool checkClick(Board *board, const Coord pos, const Coord downPos)
+{
+    if(
+        mouseBtnReleased(MOUSE_L) &&
+        validTilePos(pos, board->len) &&
+        validTilePos(downPos, board->len) &&
+        coordSame(downPos, pos) &&
+        !mouseBtnState(MOUSE_R)
+    ){
+        printf(
+            "MOUSE_L -\n\tpos: (%i,%i)\n\tmpos: (%i,%i)\n",
+            pos.x, pos.y, mouse.pos.x, mouse.pos.y
+        );
+        board->lastClick = pos;
+        if(board->tile[pos.x][pos.y].isBomb){
+            board->state = BS_LOOSE;
+            return 0;
+        }
+        return floodFill(board, pos);
+    }
+    return 0;
+}
+
+bool checkRight(Board *board, const Coord pos, const Coord downPos)
+{
+    if(mouseBtnReleased(MOUSE_R) &&
+    validTilePos(pos, board->len) &&
+    validTilePos(downPos, board->len) &&
+    coordSame(downPos, pos) &&
+    !mouseBtnState(MOUSE_L)){
+        if(board->tile[pos.x][pos.y].state != S_NUM){
+            if(++board->tile[pos.x][pos.y].state >= S_QEST_SAFE)
+                board->tile[pos.x][pos.y].state = S_TILE;
+            if(board->tile[pos.x][pos.y].state == S_FLAG)
+                printf("Flagged: %u / %u\n", boardNumState(*board, S_FLAG), board->numBombs);
+        }
+        return true;
+    }
+    return false;
+}
+
 uint boardUpdate(Board *board)
 {
     static Coord down[2] = {0};
@@ -116,69 +183,31 @@ uint boardUpdate(Board *board)
                 printf("Starting new game!\n");
             break;
         case BS_NEW:
-            if(
-                mouseBtnReleased(MOUSE_L) &&
-                validTilePos(pos, board->len) &&
-                validTilePos(down[0], board->len) &&
-                coordSame(down[0], pos)
-            )
-                boardPlaceBombs(board, pos);
+            if(checkPlaceBombs(board, pos, down[0]))
+                printf(
+                    "Placed %u bombs\nIn %i,%i tiles\n",
+                    board->numBombs, board->len.x, board->len.y
+                );
             break;
         case BS_PLAY:
-            if(keyReleased(SDL_SCANCODE_R)){
-                if(keyState(SDL_SCANCODE_LCTRL) || keyState(SDL_SCANCODE_RCTRL))
-                    *board = boardReset(*board);
-                else
-                    board = boardRestart(board);
-                break;
-            }
+            if(checkRestart(board))
+                printf("Fresh board\n");
 
-            if(
-                mouseBtnReleased(MOUSE_L) &&
-                validTilePos(pos, board->len) &&
-                validTilePos(down[0], board->len) &&
-                coordSame(down[0], pos) &&
-                !mouseBtnState(MOUSE_R)
-            ){
-                printf(
-                    "MOUSE_L -\n\tpos: (%i,%i)\n\tmpos: (%i,%i)\n",
-                    pos.x, pos.y, mouse.pos.x, mouse.pos.y
-                );
-                board->lastClick = pos;
-                if(board->tile[pos.x][pos.y].isBomb){
-                    board->state = BS_LOOSE;
+            uint left = 0;
+            if(printCleared(checkClick(board, pos, down[0]))){
+                if((left = boardRemaining(*board))){
+                    printf("Tiles remaining: %u\n", left);
+                }else{
+                    board->state = BS_WIN;
                     break;
                 }
-                const uint cleared = floodFill(board, pos);
-                if(cleared){
-                    printf("cleared %u tiles\n", cleared);
-                    const uint left = boardRemaining(*board);
-                    printf("Tiles remaining: %u\n", left);
-                    if(left == 0){
-                        board->state = BS_WIN;
-                        break;
-                    }
-                }
             }
 
-            if(
-                mouseBtnReleased(MOUSE_R) &&
-                validTilePos(pos, board->len) &&
-                validTilePos(down[1], board->len) &&
-                coordSame(down[1], pos) &&
-                !mouseBtnState(MOUSE_L)
-            ){
+            if(checkRight(board, pos, down[1]))
                 printf(
                     "MOUSE_R -\n\tpos: (%i,%i)\n\tmpos: (%i,%i)\n",
                     pos.x, pos.y, mouse.pos.x, mouse.pos.y
                 );
-                if(board->tile[pos.x][pos.y].state != S_NUM){
-                    if(++board->tile[pos.x][pos.y].state >= S_QEST_SAFE)
-                        board->tile[pos.x][pos.y].state = S_TILE;
-                    if(board->tile[pos.x][pos.y].state == S_FLAG)
-                        printf("Flagged: %u / %u\n", boardNumState(*board, S_FLAG), board->numBombs);
-                }
-            }
             break;
         default:
             break;
