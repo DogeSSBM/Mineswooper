@@ -111,7 +111,7 @@ MetaInf boardUpdate(Board *board, MetaInf inf)
                     board->state = BS_LOOSE;
                     break;
                 }
-                const uint cleared = prop(board, pos);
+                const uint cleared = floodFill(board, pos);
                 if(cleared){
                     printf("cleared %u tiles\n", cleared);
                     const uint left = boardRemaining(*board);

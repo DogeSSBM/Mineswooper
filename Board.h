@@ -121,13 +121,13 @@ Board* boardPlaceBombs(Board *board, const Coord firstClick)
             panic(">50000");
         i++;
         printf("try: %u\n", i);
-        prop(boardCalcNums(boardRngBombs(board)), board->lastClick);
+        floodFill(boardCalcNums(boardRngBombs(board)), board->lastClick);
     }while(board->type != B_RNG && !solvable(board));
     printf("%u tries\n", i);
     printBoard(*board);
     printDecals(*board);
     board = boardRestart(board);
-    printf("cleared %u tiles\n", prop(board, board->lastClick));
+    printf("cleared %u tiles\n", floodFill(board, board->lastClick));
     const uint left = boardRemaining(*board);
     printf("Tiles remaining: %u\n", left);
     return board;
@@ -149,7 +149,7 @@ uint adjTileState(const Board board, const Coord pos, const TileState state)
     return count;
 }
 
-uint prop(Board *board, const Coord pos)
+uint floodFill(Board *board, const Coord pos)
 {
     if(board->state == BS_NEW)
         board->state = BS_PLAY;
@@ -184,7 +184,7 @@ uint prop(Board *board, const Coord pos)
                 board->tile[adj.x][adj.y].state != S_TILE
             )
                 continue;
-            cleared += prop(board, adj);
+            cleared += floodFill(board, adj);
         }
     }
 

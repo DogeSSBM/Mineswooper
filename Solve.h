@@ -32,7 +32,7 @@ bool clear121(Board *board, const Coord pos)
                     validTilePos(perpb, board->len) &&
                     board->tile[perpb.x][perpb.y].state == S_TILE
                 ){
-                    prop(board, perpp);
+                    floodFill(board, perpp);
                     return true;
                 }
             }
@@ -96,7 +96,7 @@ uint clearAdj(Board *board, const Coord pos)
                     printDecalsPos(*board, adj);
                     panic("Cleared adj bomb at: (%i,%i)", adj.x, adj.y);
                 }
-                cleared += prop(board, adj);
+                cleared += floodFill(board, adj);
             }
         }
     }
@@ -177,7 +177,7 @@ bool satSolve(Board *board)
                         ){
                             board->tile[adj.x][adj.y].state = S_QEST;
                             if(reductioAdAbsurdum(board)){
-                                prop(board, adj);
+                                floodFill(board, adj);
                                 return true;
                             }
                         }

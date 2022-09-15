@@ -19,7 +19,7 @@ Board* boardCalcNums(Board *board);
 Board boardReset(Board board);
 Board* boardPlaceBombs(Board *board, const Coord firstClick);
 uint adjTileState(const Board board, const Coord pos, const TileState state);
-uint prop(Board *board, const Coord pos);
+uint floodFill(Board *board, const Coord pos);
 uint boardRemaining(const Board board);
 
 // SOLVE_H
