@@ -11,11 +11,11 @@ Will result in a 40 tile wide, by 32 tile high board.
 
 The default board length is 30,16 (30 tiles wide, by 16 tiles high).
 
-When on the "New Game" screen, you can resize the board by pressing the arrow keys.
-Up: Decrease Height
-Down: Increase Height
-Left: Decrease Width
-Right: Increase Width
+When on the "New Game" screen, you can resize the board using WASD / arrow keys.
+`W` / `Arrow Up`: Decrease Height
+`S` / `Arrow Down`: Increase Height
+`A` / `Arrow Left`: Decrease Width
+`D` / `Arrow Right`: Increase Width
 
 ## Number of Mines
 Passing a single number as an argument will specify how many tiles will be mines.
@@ -25,6 +25,8 @@ Passing a single number as an argument will specify how many tiles will be mines
 Will generate a board with 50 mines.
 
 By default 99 tiles will be mines.
+
+When on the "New Game" screen, scrolling the mouse wheel down/up will increase/decrease the number of mines.
 
 ## Generation strategy
 Passing `RNG`, `ADJ`, or `SAT` as an argument will change the method used to generate a board configuration.
