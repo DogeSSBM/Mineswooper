@@ -62,6 +62,7 @@ MetaInf boardUpdate(Board *board, MetaInf inf)
         down[1] = pos;
 
     switch(board->state){
+        case BS_WIN:
         case BS_LOOSE:
             ;
             const Rect rect = rectify(
@@ -90,7 +91,7 @@ MetaInf boardUpdate(Board *board, MetaInf inf)
                 if(keyState(SDL_SCANCODE_LCTRL) || keyState(SDL_SCANCODE_RCTRL))
                     *board = boardReset(*board);
                 else
-                    *board = boardRestart(*board);
+                    board = boardRestart(board);
                 break;
             }
 
@@ -108,9 +109,17 @@ MetaInf boardUpdate(Board *board, MetaInf inf)
                 board->lastClick = pos;
                 if(board->tile[pos.x][pos.y].isBomb){
                     board->state = BS_LOOSE;
-                    *board = boardFree(*board);
-                }else{
-                    printf("cleared %u tiles\n", prop(board, pos));
+                    break;
+                }
+                const uint cleared = prop(board, pos);
+                if(cleared){
+                    printf("cleared %u tiles\n", cleared);
+                    const uint left = boardRemaining(*board);
+                    printf("Tiles remaining: %u\n", left);
+                    if(left == 0){
+                        board->state = BS_WIN;
+                        break;
+                    }
                 }
             }
 
@@ -128,6 +137,8 @@ MetaInf boardUpdate(Board *board, MetaInf inf)
                 if(board->tile[pos.x][pos.y].state != S_NUM){
                     if(++board->tile[pos.x][pos.y].state == S_N)
                         board->tile[pos.x][pos.y].state = S_TILE;
+                    if(board->tile[pos.x][pos.y].state == S_FLAG)
+                        printf("Flagged: %u / %u\n", boardNumState(*board, S_FLAG), board->numBombs);
                 }
             }
             break;

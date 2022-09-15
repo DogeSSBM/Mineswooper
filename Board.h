@@ -72,17 +72,17 @@ Board boardReset(Board board)
     return board;
 }
 
-Board boardRestart(Board board)
+Board* boardRestart(Board *board)
 {
-    if(!board.tile)
-        panic("Cant boardRestart when board.tiles == NULL");
+    if(!board->tile)
+        panic("Cant boardRestart when board->tiles == NULL");
 
     printf("Restarting board\n");
-    for(int y = 0; y < board.len.y; y++)
-        for(int x = 0; x < board.len.x; x++)
-            board.tile[x][y].state = S_TILE;
+    for(int y = 0; y < board->len.y; y++)
+        for(int x = 0; x < board->len.x; x++)
+            board->tile[x][y].state = S_TILE;
 
-    board.state = BS_PLAY;
+    board->state = BS_PLAY;
     return board;
 }
 
@@ -120,14 +120,16 @@ Board* boardPlaceBombs(Board *board, const Coord firstClick)
         if(i > 50000)
             panic(">50000");
         i++;
-        boardCalcNums(boardRngBombs(board));
-        board->state = BS_PLAY;
-        prop(board, board->lastClick);
+        printf("try: %u\n", i);
+        prop(boardCalcNums(boardRngBombs(board)), board->lastClick);
     }while(board->type != B_RNG && !solvable(board));
-    *board = boardRestart(*board);
-    board->state = BS_PLAY;
     printf("%u tries\n", i);
+    // printBoard(*board);
+    // printDecals(*board);
+    board = boardRestart(board);
     printf("cleared %u tiles\n", prop(board, board->lastClick));
+    const uint left = boardRemaining(*board);
+    printf("Tiles remaining: %u\n", left);
     return board;
 }
 
@@ -149,6 +151,9 @@ uint adjTileState(const Board board, const Coord pos, const TileState state)
 
 uint prop(Board *board, const Coord pos)
 {
+    if(board->state == BS_NEW)
+        board->state = BS_PLAY;
+
     if(board->state != BS_PLAY)
         panic(
             "can only prop when board->state == BS_PLAY, board->state: %s",
@@ -186,6 +191,15 @@ uint boardRemaining(const Board board)
         for(int x = 0; x < board.len.x; x++)
             total += board.tile[x][y].state != S_NUM;
     return total - board.numBombs;
+}
+
+uint boardNumState(const Board board, const TileState state)
+{
+    uint total = 0;
+    for(int y = 0; y < board.len.y; y++)
+        for(int x = 0; x < board.len.x; x++)
+            total += board.tile[x][y].state == state;
+    return total;
 }
 
 #endif /* end of include guard: BOARD_H */

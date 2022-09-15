@@ -41,6 +41,7 @@ const char *BoardTypeStr[B_N] = {
 
 typedef enum{
     BS_NEW,
+    BS_WIN,
     BS_LOOSE,
     BS_PLAY,
     BS_N

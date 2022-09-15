@@ -11,7 +11,7 @@ void printBoard(const Board board)
             if(board.tile[x][y].isBomb)
                 putchar('B');
             else
-                putchar('0'+board.tile[x][y].num);
+                putchar(board.tile[x][y].num ? '0' + board.tile[x][y].num : ' ');
             putchar(' ');
         }
         putchar('\n');
@@ -27,7 +27,7 @@ void printDecals(const Board board)
     for(int y = 0; y < board.len.y; y++){
         for(int x = 0; x < board.len.x; x++){
             if(board.tile[x][y].state == S_NUM)
-                putchar(board.tile[x][y].num ? '0'+board.tile[x][y].num : ' ');
+                putchar(board.tile[x][y].num ? '0' + board.tile[x][y].num : ' ');
             else
                 putchar(TileStateChar[board.tile[x][y].state]);
             putchar(' ');

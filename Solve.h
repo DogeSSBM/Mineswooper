@@ -3,9 +3,10 @@
 
 bool clear121(Board *board, const Coord pos)
 {
+
     for(uint i = 0; i < 2; i++){
         const Coord a = coordShift(pos, i,  1);
-        const Coord b = coordShift(pos, i, -1);
+        const Coord b = coordShift(pos, dirINV(i), 1);
         if(
             validTilePos(a, board->len) &&
             board->tile[a.x][a.y].state == S_NUM &&
@@ -15,13 +16,26 @@ bool clear121(Board *board, const Coord pos)
             board->tile[b.x][b.y].state == S_NUM &&
             board->tile[b.x][b.y].num == 1
         ){
-            const Coord perpR = coordShift(pos, dirROR(i), 1);
-            const Coord perpL = coordShift(pos, dirROL(i), 1);
-            if(validTilePos(perpR, board->len) && board->tile[perpR.x][perpR.y].state == S_TILE)
-                board->tile[perpR.x][perpR.y].state = S_NUM;
-            else
-                board->tile[perpL.x][perpL.y].state = S_NUM;
-            return true;
+            Direction d = dirROR(i);
+            for(uint j = 0; j < 2; j++){
+                d = dirINV(d);
+                const Coord perpa = coordShift(a,   d, 1);
+                const Coord perpp = coordShift(pos, d, 1);
+                const Coord perpb = coordShift(b,   d, 1);
+                if(
+                    validTilePos(perpa, board->len) &&
+                    board->tile[perpa.x][perpa.y].state == S_TILE &&
+
+                    validTilePos(perpp, board->len) &&
+                    board->tile[perpp.x][perpp.y].state == S_TILE &&
+
+                    validTilePos(perpb, board->len) &&
+                    board->tile[perpb.x][perpb.y].state == S_TILE
+                ){
+                    prop(board, perpp);
+                    return true;
+                }
+            }
         }
     }
     return false;
@@ -72,9 +86,9 @@ uint clearAdj(Board *board, const Coord pos)
 
 bool solve(Board *board, const bool patterns)
 {
-    uint tries = 3;
+    bool progress;
     do{
-        bool progress = false;
+        progress = false;
         for(int y = 0; y < board->len.y; y++){
             for(int x = 0; x < board->len.x; x++){
                 const Coord pos = iC(x,y);
@@ -89,20 +103,17 @@ bool solve(Board *board, const bool patterns)
 
                     if(patterns && board->tile[x][y].num == 2)
                         progress |= clear121(board, pos);
+
                 }
             }
         }
-        tries = progress ? 3 : tries-1;
-    }while(tries);
+    }while(progress);
 
     return !boardRemaining(*board);
 }
 
 bool solvable(Board *board)
 {
-    if(board->type == B_RNG)
-        return true;
-
     if(board->type == B_ADJ)
         return solve(board, false);
 
