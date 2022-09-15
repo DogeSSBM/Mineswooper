@@ -31,7 +31,7 @@ bool solvable(Board *board);
 // UPDATE_H
 Coord mouseTilePos(const uint scale, const Offset boardOff);
 Coord tileMousePos(const uint scale, const Offset boardOff, const Coord tpos);
-MetaInf boardUpdate(Board *board, MetaInf inf);
+uint boardUpdate(Board *board);
 
 // PRINT_H
 void printBoard(const Board board);
@@ -42,10 +42,6 @@ void printDecalsPos(const Board board, const Coord pos);
 uint tileScale(const Length win, const Length len);
 Offset tileOffset(const Length win, const Length len, const uint scale);
 void drawBoardBlank(const Length len, const uint scale, const Offset off);
-void drawBoard(const Board board, const MetaInf inf);
-
-// INF_H
-MetaInf updateInf(MetaInf inf);
-MetaInf infBoard(const Board board);
+void drawBoard(const Board board, const uint scale);
 
 #endif /* end of include guard: DECLS_H */

@@ -66,59 +66,11 @@ typedef struct{
 }Board;
 
 typedef enum{
-    M_LEN,
-    M_WIN,
-    M_MID,
-    M_SCALE,
-    M_OFF,
-    M_N
-}MetaInfType;
-const char *MetaInfTypeStr[M_N] = {
-    "M_LEN",
-    "M_WIN",
-    "M_MID",
-    "M_SCALE",
-    "M_OFF"
-};
-
-typedef struct{
-    Length len;
-    Length win;
-    Coord mid;
-    uint scale;
-    Offset off;
-    bool updated[M_N];
-    struct{
-        Length len;
-        Length win;
-        Coord mid;
-        uint scale;
-        Offset off;
-    }prv;
-}MetaInf;
-
-typedef enum{
     A_LEN,
     A_MIN,
     A_TYP,
     A_CHEAT,
     A_N
 }ArgType;
-
-typedef enum{
-    C_NONE,
-    C_CLEAR,
-    C_DECAL,
-    C_CHORD,
-    C_LOOSE,
-    C_START,
-    C_N
-}ClickType;
-const char *ClickTypeStr[C_N] = {
-    "C_NONE",
-    "C_CLEAR",
-    "C_DECAL",
-    "C_CHORD",
-};
 
 #endif /* end of include guard: TYPES_H */

@@ -18,6 +18,18 @@ uint parseUint(char *str, const uint len)
     return ret;
 }
 
+bool sameStrLower(char *a, char *b)
+{
+    const uint len = strlen(a);
+    if(strlen(b) != len)
+        return false;
+    for(uint i = 0; i < len; i++)
+        if(tolower(a[i]) != tolower(b[i]))
+            return false;
+
+    return true;
+}
+
 ArgType parseArgType(char *arg)
 {
     if(!arg || strlen(arg) == 0)
@@ -27,7 +39,12 @@ ArgType parseArgType(char *arg)
             return A_LEN;
         return A_MIN;
     }
-    return strlen(arg) == strlen("cheat") && strcmp(arg, "cheat") == 0 ? A_CHEAT : A_TYP;
+    if(sameStrLower("cheat", arg))
+        return A_CHEAT;
+    else if(strlen(arg) == 3)
+        return A_TYP;
+    panic("Unknown arg type! arg: %s", arg);
+    return A_N;
 }
 
 Length parseLen(char *arg)
@@ -46,16 +63,14 @@ uint parseBombs(char *arg)
 
 BoardType parseType(char *arg)
 {
-    if(!arg || strlen(arg) != 3)
-        usage();
-    if(strcmp(arg, "RNG") == 0)
+    if(sameStrLower(arg, "rng"))
         return B_RNG;
-    if(strcmp(arg, "ADJ") == 0)
+    if(sameStrLower(arg, "adj"))
         return B_ADJ;
-    if(strcmp(arg, "SAT") == 0)
+    if(sameStrLower(arg, "sat"))
         return B_SAT;
-    usage();
-    return B_RNG;
+    panic("Unknown BoardType! arg: %s", arg);
+    return B_N;
 }
 
 Board boardArgs(int argc, char **argv)

@@ -11,51 +11,92 @@ Coord tileMousePos(const uint scale, const Offset boardOff, const Coord tpos)
     return coordOffset(coordMul(tpos, scale), boardOff);
 }
 
-MetaInf boardUpdate(Board *board, MetaInf inf)
+void checkQuit(Board *board)
 {
-    if(keyPressed(SDL_SCANCODE_ESCAPE)){
+    bool quit = false;
+    if((quit = keyPressed(SDL_SCANCODE_ESCAPE)))
         printf("Escape pressed, freeing board and exiting\n");
-        *board = boardFree(*board);
-        exit(0);
+    else if((quit =
+        keyPressed(SDL_SCANCODE_Q) &&
+        (keyState(SDL_SCANCODE_LCTRL) || keyState(SDL_SCANCODE_RCTRL))
+    ))
+        printf("Ctrl+Q pressed, freeing board and exiting\n");
+    if(quit){
+        if(board->tile)
+            *board = boardFree(*board);
+        exit(EXIT_SUCCESS);
     }
+}
 
+bool checkCheat(const bool cheat)
+{
+    if(keyReleased(SDL_SCANCODE_SPACE)){
+        printf("board->cheat = %s\n", !cheat?"true":"false");
+        return !cheat;
+    }
+    return cheat;
+}
+
+bool checkLen(Board* board)
+{
+    const Scancode arowkey[4] = {
+        SDL_SCANCODE_UP,
+        SDL_SCANCODE_RIGHT,
+        SDL_SCANCODE_DOWN,
+        SDL_SCANCODE_LEFT
+    };
+    const Scancode wasdkey[4] = {
+        SDL_SCANCODE_W,
+        SDL_SCANCODE_D,
+        SDL_SCANCODE_S,
+        SDL_SCANCODE_A
+    };
+    Length newLen = board->len;
+    for(Direction d = 0; d < 4; d++)
+            if(keyPressed(wasdkey[d]) || keyPressed(arowkey[d]))
+                newLen = coordMost(iC(4,4), coordShift(newLen, d, 1));
+    if(!coordSame(newLen, board->len)){
+        if(board->tile)
+            *board = boardFree(*board);
+        board->len = newLen;
+        *board = boardAlloc(*board);
+        return true;
+    }
+    return false;
+}
+
+bool checkNewGame(Board *board, const Coord mid, const uint scale)
+{
+    const Rect rect = rectify(mid, iC(strlen(" New Game ")*scale, scale));
+    if(
+        mouseBtnReleased(MOUSE_L) &&
+        coordInRect(mouse.pos, rectOffset(rect, iC(-rect.w/2, -rect.h/2)))
+    ){
+        board->state = BS_NEW;
+        if(!board->tile)
+            *board = boardAlloc(*board);
+        return true;
+    }
+    return false;
+}
+
+uint boardUpdate(Board *board)
+{
     static Coord down[2] = {0};
-    memset(inf.updated, false, sizeof(bool)*M_N);
+    static Length win = {.x=-1,.y=-1};
+    static Coord mid = {.x=-1,.y=-1};
+    static Coord off = {.x=-1,.y=-1};
+    static uint scale = 0;
+    checkQuit(board);
 
-    if(board->state == BS_LOOSE){
-        if(keyReleased(SDL_SCANCODE_SPACE)){
-            board->cheat = !board->cheat;
-            printf("board->cheat = %s\n", board->cheat?"true":"false");
-        }
-
-        inf.prv.len = inf.len;
-        inf.len = iC(
-            imax(4, board->len.x+keyPressed(SDL_SCANCODE_RIGHT)-keyPressed(SDL_SCANCODE_LEFT)),
-            imax(4, board->len.y+keyPressed(SDL_SCANCODE_DOWN)-keyPressed(SDL_SCANCODE_UP))
-        );
-        if((inf.updated[M_LEN] = !coordSame(inf.prv.len, inf.len)))
-            board->len = inf.len;
+    if(scale == 0 || windowResized()){
+        win = getWindowLen();
+        mid = coordDiv(win, 2);
+        scale = tileScale(win, board->len);
+        off = tileOffset(win, board->len, scale);
     }
 
-    if(windowResized()){
-        inf.prv.win = inf.win;
-        inf.prv.mid = inf.mid;
-        inf.updated[M_WIN] = true;
-        inf.updated[M_MID] = true;
-        inf.win = getWindowLen();
-        inf.mid = coordDiv(inf.win, 2);
-    }
-
-    if(inf.updated[M_WIN] || inf.updated[M_LEN]){
-        inf.prv.scale = inf.scale;
-        inf.prv.off = inf.off;
-        inf.updated[M_SCALE] = true;
-        inf.updated[M_OFF] = true;
-        inf.scale = tileScale(inf.win, inf.len);
-        inf.off = tileOffset(inf.win, inf.len, inf.scale);
-    }
-
-    const Coord pos = mouseTilePos(inf.scale, inf.off);
+    Coord pos = mouseTilePos(scale, off);
     if(mouseBtnPressed(MOUSE_L))
         down[0] = pos;
     if(mouseBtnPressed(MOUSE_R))
@@ -64,18 +105,15 @@ MetaInf boardUpdate(Board *board, MetaInf inf)
     switch(board->state){
         case BS_WIN:
         case BS_LOOSE:
-            ;
-            const Rect rect = rectify(
-                inf.mid,
-                iC(strlen(" New Game ")*inf.scale, inf.scale)
-            );
-            if(
-                mouseBtnReleased(MOUSE_L) &&
-                coordInRect(mouse.pos, rectOffset(rect, iC(-rect.w/2, -rect.h/2)))
-            ){
-                *board = boardAlloc(*board);
-                board->state = BS_NEW;
+            board->cheat = checkCheat(board->cheat);
+            if(checkLen(board) || windowResized()){
+                win = getWindowLen();
+                mid = coordDiv(win, 2);
+                scale = tileScale(win, board->len);
+                off = tileOffset(win, board->len, scale);
             }
+            if(checkNewGame(board, mid, scale))
+                printf("Starting new game!\n");
             break;
         case BS_NEW:
             if(
@@ -145,7 +183,7 @@ MetaInf boardUpdate(Board *board, MetaInf inf)
         default:
             break;
     }
-    return updateInf(inf);
+    return scale;
 }
 
 #endif /* end of include guard: UPDATE_H */
