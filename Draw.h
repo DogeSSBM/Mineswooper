@@ -94,7 +94,7 @@ void drawBoard(const Board board, const MetaInf inf)
                     drawTextCenteredCoord(txt, coordOffset(pos, iC(inf.scale/2, inf.scale/2)));
                 }else if(board.tile[x][y].isBomb && (board.cheat || board.state == BS_LOOSE)){
                     setTextColor(BLACK);
-                    drawTextCenteredCoord("O", coordOffset(pos, iC(inf.scale/2, inf.scale/2)));
+                    drawTextCenteredCoord("B", coordOffset(pos, iC(inf.scale/2, inf.scale/2)));
                 }
 
                 if(board.tile[x][y].state == S_FLAG){
