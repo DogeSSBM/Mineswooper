@@ -45,13 +45,16 @@ const char *BoardTypeStr[B_N] = {
 typedef enum{
     BS_NEW,
     BS_WIN,
-    BS_LOOSE,
+    BS_MENU,
+    BS_OPEN,
     BS_PLAY,
     BS_N
 }BoardState;
 const char *BoardStateStr[BS_N] = {
     "BS_NEW",
-    "BS_LOOSE",
+    "BS_WIN",
+    "BS_MENU",
+    "BS_OPEN",
     "BS_PLAY"
 };
 
@@ -63,6 +66,8 @@ typedef struct{
     BoardState state;
     BoardType type;
     Tile **tile;
+    int lvl;
+    File *file;
 }Board;
 
 typedef enum{

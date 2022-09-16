@@ -52,7 +52,7 @@ void drawBoard(const Board board, const uint scale)
 
     if(board.state == BS_NEW){
         drawBoardBlank(board.len, scale, off);
-        return;
+        goto after;
     }
 
     if(board.tile == NULL)
@@ -76,7 +76,7 @@ void drawBoard(const Board board, const uint scale)
                 setColor(GREY2);
                 fillSquareCoordResize(pos, scale, -1 -(scale/8));
 
-                if(board.cheat || board.state == BS_LOOSE){
+                if(board.cheat || board.state == BS_MENU){
                     if(board.tile[x][y].isBomb){
                         setTextColor(BLACK);
                         drawTextCenteredCoord("B", coordOffset(pos, iC(scale/2, scale/2)));
@@ -119,7 +119,7 @@ void drawBoard(const Board board, const uint scale)
         }
     }
     after:
-    if(board.state == BS_LOOSE || board.state == BS_WIN){
+    if(board.state == BS_MENU || board.state == BS_WIN){
         if(board.tile == NULL)
             drawBoardBlank(board.len, scale, off);
 
@@ -134,10 +134,7 @@ void drawBoard(const Board board, const uint scale)
         fillRectRect(rect);
         drawTextCenteredCoord(" New Game ", mid);
 
-        if(board.tile == NULL)
-            return;
-
-        if(board.state == BS_LOOSE){
+        if(board.state == BS_MENU){
 
             if(validTilePos(board.lastClick, board.len)){
                 fillSquareCoordResize(board.lastClick, scale, -2);
@@ -147,7 +144,8 @@ void drawBoard(const Board board, const uint scale)
             }
         }
     }
-
+    setTextColor(CYAN);
+    drawTextCenteredCoord(BoardStateStr[board.state], coordMul(iC(3,3),scale));
 }
 
 #endif /* end of include guard: DRAW_H */

@@ -125,7 +125,7 @@ bool checkClick(Board *board, const Coord pos, const Coord downPos)
         );
         board->lastClick = pos;
         if(board->tile[pos.x][pos.y].isBomb){
-            board->state = BS_LOOSE;
+            board->state = BS_MENU;
             return 0;
         }
         return floodFill(board, pos);
@@ -175,27 +175,7 @@ bool checkSave(Board *board)
     ))
         return false;
 
-    for(uint i = 0; i < ~0u; i++){
-        char path[64] = {0};
-        sprintf(path, "./Saves/%u.swoop", i);
-        printf("Checking if \"%s\" exists\n", path);
-        File *file = fopen(path, "r");
-        if(file){
-            printf("It does\n");
-            fclose(file);
-        }else{
-            printf("It doesn't\n");
-            file = fopen(path, "w");
-            for(int y = 0; y < board->len.y; y++){
-                for(int x = 0; x < board->len.x; x++){
-                    fputc(board->tile[x][y].isBomb ? 'B' : '0'+board->tile[x][y].num, file);
-                }
-                fputc('\n', file);
-            }
-            fclose(file);
-            break;
-        }
-    }
+
     return true;
 }
 
@@ -223,7 +203,7 @@ uint boardUpdate(Board *board)
 
     switch(board->state){
         case BS_WIN:
-        case BS_LOOSE:
+        case BS_MENU:
             if(checkSave(board))
                 printf("Saved board\n");
             board->cheat = checkCheat(board->cheat);
@@ -239,6 +219,20 @@ uint boardUpdate(Board *board)
             if(checkNewGame(board, mid, scale))
                 printf("Starting new game!\n");
             break;
+        case BS_OPEN:
+            if(checkRestart(board)){
+                board->state = BS_PLAY;
+                break;
+            }
+
+            board->lvl = imax(0, board->lvl-keyPressed(SDL_SCANCODE_MINUS)) + keyPressed(SDL_SCANCODE_PLUS);
+
+            if(keyPressed(SDL_SCANCODE_ENTER) && boardLoad(board)){
+                board->state = BS_PLAY;
+                break;
+            }
+
+            break;
         case BS_NEW:
             if(checkPlaceBombs(board, pos, down[0]))
                 printf(
@@ -247,6 +241,11 @@ uint boardUpdate(Board *board)
                 );
             break;
         case BS_PLAY:
+            if(keyPressed(SDL_SCANCODE_L)){
+                board->state = BS_MENU;
+                break;
+            }
+
             if(checkSave(board))
                 printf("Saved board\n");
 

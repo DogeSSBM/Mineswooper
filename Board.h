@@ -211,4 +211,90 @@ uint boardNumState(const Board board, const TileState state)
     return total;
 }
 
+bool boardSave(Board *board)
+{
+    for(uint i = 0; i < ~0u; i++){
+        char path[64] = {0};
+        sprintf(path, "./Saves/%u.swoop", i);
+        printf("Checking if \"%s\" exists\n", path);
+        File *file = fopen(path, "r");
+        if(file){
+            printf("It does\n");
+            fclose(file);
+        }else{
+            printf("It doesn't\n");
+            file = fopen(path, "w");
+            for(int y = 0; y < board->len.y; y++){
+                for(int x = 0; x < board->len.x; x++){
+                    if(fputc(board->tile[x][y].isBomb ? 'B' : '0'+board->tile[x][y].num, file) == EOF){
+                        fclose(file);
+                        return false;
+                    }
+                }
+                if(fputc('\n', file) == EOF){
+                    fclose(file);
+                    return false;
+                }
+            }
+            fclose(file);
+            break;
+        }
+    }
+    return true;
+}
+
+Length boardFileLength(File *file)
+{
+    if(file == NULL)
+        panic("Cant get length of NULL file");
+    Length len = {0};
+    int c;
+    while((c = fgetc(file)) != EOF && c != '\n')
+        len.x++;
+    if(c == EOF){
+        fclose(file);
+        panic("EOF encountered before '\\n'. char index: %i", len.x);
+    }
+    rewind(file);
+    do{
+        for(uint x = 0; x < len.x; x++){
+            if((c = fgetc(file)) == EOF){
+                fclose(file);
+                panic("unexpected EOF. char pos: %i,%i", x, len.y);
+            }else if(c == '\n'){
+                fclose(file);
+                panic("unexpected '\\n'. char pos: %i,%i", x, len.y);
+            }
+        }
+
+        if((c = fgetc) != '\n' && c != EOF){
+            fclose(file);
+            panic("Expected '\\n' or EOF at char pos: %i,%i. Got char: %c", x, len.y, c);
+        }
+        len.y++;
+    }while(c != EOF);
+    rewind(file);
+    printf("Board file len: %i,%i\n", len.x, len.y);
+    return len;
+}
+
+bool boardLoad(Board *board)
+{
+    char buf[64] = {0};
+    sprintf(buf, "./Saves/%i.swooper", board->lvl);
+    if(board->file = fopen(buf, "r") == NULL)
+        return false;
+    board->len = boardFileLength(board->file);
+    if(board->tile)
+        *board = boardFree(*board);
+    *board = boardAlloc(*board);
+    for(uint y = 0; y < board->len.y; y++){
+        for(uint x = 0; x < board->len.x; x++){
+            const int c = fgetc(board->file);
+            if(c == 'B')
+                board->tile[x][y].isBomb = true;
+        }
+    }
+}
+
 #endif /* end of include guard: BOARD_H */
