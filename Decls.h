@@ -30,9 +30,15 @@ bool boardLoad(Board *board);
 
 
 // SOLVE_H
+bool clear121(Board *board, const Coord pos);
 uint flagAdj(Board *board, const Coord pos);
+uint setAdj(Board *board, const Coord pos, const TileState state);
 uint clearAdj(Board *board, const Coord pos);
-bool solvableAdj(Board *board);
+Board* resetQuests(Board *board);
+bool isAbsurd(Board *board);
+bool reductioAdAbsurdum(Board *board);
+bool satSolve(Board *board);
+bool solve(Board *board, const bool patterns);
 bool solvable(Board *board);
 
 // UPDATE_H
