@@ -133,6 +133,15 @@ bool checkClick(Board *board, const Coord pos, const Coord downPos)
     return 0;
 }
 
+bool checkCtrlKey(const Scancode key)
+{
+    return (
+        keyReleased(key) && (keyState(SDL_SCANCODE_LCTRL) || keyState(SDL_SCANCODE_RCTRL))
+    ) || (
+        keyState(key)  && (keyReleased(SDL_SCANCODE_LCTRL) || keyReleased(SDL_SCANCODE_RCTRL))
+    );
+}
+
 bool checkRight(Board *board, const Coord pos, const Coord downPos)
 {
     if(mouseBtnReleased(MOUSE_R) &&
@@ -166,17 +175,9 @@ bool checkBombNum(Board *board)
 
 bool checkSave(Board *board)
 {
-    if(!(
-        keyReleased(SDL_SCANCODE_S) &&
-        (keyState(SDL_SCANCODE_LCTRL) || keyState(SDL_SCANCODE_RCTRL))
-    ) && !(
-        (keyReleased(SDL_SCANCODE_LCTRL) || keyReleased(SDL_SCANCODE_RCTRL)) &&
-        keyState(SDL_SCANCODE_S)
-    ))
-        return false;
-
-
-    return true;
+    if(checkCtrlKey(SDL_SCANCODE_S))
+        return boardSave(board);
+    return false;
 }
 
 uint boardUpdate(Board *board)
@@ -204,6 +205,10 @@ uint boardUpdate(Board *board)
     switch(board->state){
         case BS_WIN:
         case BS_MENU:
+            if(checkCtrlKey(SDL_SCANCODE_O)){
+                board->state = BS_OPEN;
+                break;
+            }
             if(checkSave(board))
                 printf("Saved board\n");
             board->cheat = checkCheat(board->cheat);
@@ -225,15 +230,23 @@ uint boardUpdate(Board *board)
                 break;
             }
 
-            board->lvl = imax(0, board->lvl-keyPressed(SDL_SCANCODE_MINUS)) + keyPressed(SDL_SCANCODE_PLUS);
+            const int prvLvl = board->lvl;
+            board->lvl = imax(0, board->lvl-keyPressed(SDL_SCANCODE_MINUS)) + keyPressed(SDL_SCANCODE_EQUALS);
+            if(prvLvl != board->lvl)
+                printf("lvl: %i\n", board->lvl);
 
-            if(keyPressed(SDL_SCANCODE_ENTER) && boardLoad(board)){
+            if(keyPressed(SDL_SCANCODE_RETURN) && boardLoad(board)){
+                printf("Loaded\n");
                 board->state = BS_PLAY;
                 break;
             }
 
             break;
         case BS_NEW:
+            if(checkCtrlKey(SDL_SCANCODE_O)){
+                board->state = BS_OPEN;
+                break;
+            }
             if(checkPlaceBombs(board, pos, down[0]))
                 printf(
                     "Placed %u bombs\nIn %i,%i tiles\n",
@@ -241,6 +254,10 @@ uint boardUpdate(Board *board)
                 );
             break;
         case BS_PLAY:
+            if(checkCtrlKey(SDL_SCANCODE_O)){
+                board->state = BS_OPEN;
+                break;
+            }
             if(keyPressed(SDL_SCANCODE_L)){
                 board->state = BS_MENU;
                 break;

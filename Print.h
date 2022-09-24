@@ -62,4 +62,20 @@ uint printCleared(const uint cleared)
     return cleared;
 }
 
+void printTilePacked(const char c)
+{
+    for(int i = 7; i >= 0; i--)
+        putchar((c>>i) & 1? '1':'0');
+    putchar('\n');
+}
+
+void printTile(const Tile tile)
+{
+    printf("(Tile){\n");
+    printf("\t.isBomb = %s,\n", tile.isBomb ? "true" : "false");
+    printf("\t.num = %u,\n", tile.num);
+    printf("\t.state = %s\n", TileStateStr[tile.state]);
+    printf("}\n");
+}
+
 #endif /* end of include guard: PRINT_H */

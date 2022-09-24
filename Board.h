@@ -211,38 +211,6 @@ uint boardNumState(const Board board, const TileState state)
     return total;
 }
 
-bool boardSave(Board *board)
-{
-    for(uint i = 0; i < ~0u; i++){
-        char path[64] = {0};
-        sprintf(path, "./Saves/%u.swoop", i);
-        printf("Checking if \"%s\" exists\n", path);
-        File *file = fopen(path, "r");
-        if(file){
-            printf("It does\n");
-            fclose(file);
-        }else{
-            printf("It doesn't\n");
-            file = fopen(path, "w");
-            for(int y = 0; y < board->len.y; y++){
-                for(int x = 0; x < board->len.x; x++){
-                    if(fputc(board->tile[x][y].isBomb ? 'B' : '0'+board->tile[x][y].num, file) == EOF){
-                        fclose(file);
-                        return false;
-                    }
-                }
-                if(fputc('\n', file) == EOF){
-                    fclose(file);
-                    return false;
-                }
-            }
-            fclose(file);
-            break;
-        }
-    }
-    return true;
-}
-
 Length boardFileLength(File *file)
 {
     if(file == NULL)
@@ -251,50 +219,121 @@ Length boardFileLength(File *file)
     int c;
     while((c = fgetc(file)) != EOF && c != '\n')
         len.x++;
-    if(c == EOF){
-        fclose(file);
-        panic("EOF encountered before '\\n'. char index: %i", len.x);
-    }
+    printf("x: %i\n", len.x);
     rewind(file);
-    do{
-        for(uint x = 0; x < len.x; x++){
-            if((c = fgetc(file)) == EOF){
-                fclose(file);
-                panic("unexpected EOF. char pos: %i,%i", x, len.y);
-            }else if(c == '\n'){
+
+    while((c = fgetc(file)) != EOF){
+        len.y += c == '\n';
+    }
+
+    rewind(file);
+    printf("y: %i\n", len.y);
+
+    for(int y = 0; y < len.y; y++){
+        for(int x = 0; x < len.x; x++){
+            if((c = fgetc(file))=='\n'){
                 fclose(file);
                 panic("unexpected '\\n'. char pos: %i,%i", x, len.y);
+            }else if(c == EOF){
+                fclose(file);
+                panic("unexpected EOF. char pos: %i,%i", x, len.y);
             }
         }
-
-        if((c = fgetc) != '\n' && c != EOF){
+        if((c = fgetc(file)) != '\n'){
             fclose(file);
-            panic("Expected '\\n' or EOF at char pos: %i,%i. Got char: %c", x, len.y, c);
+            panic("expected '\\n' at char pos: %i,%i", len.x, y);
         }
-        len.y++;
-    }while(c != EOF);
+    }
+    if((c = fgetc(file)) != EOF){
+        fclose(file);
+        panic("Expected EOF at pos: %i,%i", len.x, len.y);
+    }
+
     rewind(file);
     printf("Board file len: %i,%i\n", len.x, len.y);
     return len;
 }
 
+Tile tileUnpack(char c)
+{
+    Tile tile = {0};
+    tile.isBomb = 1 & (c >> 7);
+    tile.num = 15 & (c >> 3);
+    tile.state = 7 & c;
+    return tile;
+}
+
+char tilePack(const Tile tile)
+{
+    return tile.state | (tile.num << 3) | (tile.isBomb << 7);
+}
+
+bool boardSave(Board *board)
+{
+
+    for(uint i = 0; i < ~0u; i++){
+        char path[64] = {0};
+        sprintf(path, "./Saves/%u.swoop", i);
+        File *file = fopen(path, "r");
+        if(file){
+            fclose(file);
+        }else{
+            printf("Saving board in file \"%s\"\n", path);
+            file = fopen(path, "w");
+            for(int y = 0; y < board->len.y; y++){
+                for(int x = 0; x < board->len.x; x++)
+                    fputc(tilePack(board->tile[x][y]), file);
+                if(fputc('\n', file) == EOF){
+                    fclose(file);
+                    return false;
+                }
+            }
+            fclose(file);
+            return true;
+        }
+    }
+    return false;
+}
+
 bool boardLoad(Board *board)
 {
     char buf[64] = {0};
-    sprintf(buf, "./Saves/%i.swooper", board->lvl);
-    if(board->file = fopen(buf, "r") == NULL)
+    sprintf(buf, "./Saves/%i.swoop", board->lvl);
+    if((board->file = fopen(buf, "r")) == NULL){
+        printf("Board at \"%s\" does not exitst\n", buf);
         return false;
+    }
     board->len = boardFileLength(board->file);
+    printf("len.x: %i\nlen.y: %i\n", board->len.x, board->len.y);
     if(board->tile)
         *board = boardFree(*board);
+
     *board = boardAlloc(*board);
-    for(uint y = 0; y < board->len.y; y++){
-        for(uint x = 0; x < board->len.x; x++){
-            const int c = fgetc(board->file);
-            if(c == 'B')
-                board->tile[x][y].isBomb = true;
+    int c;
+    for(int y = 0; y < board->len.y; y++){
+        for(int x = 0; x < board->len.x; x++){
+            if((c = fgetc(board->file))=='\n'){
+                fclose(board->file);
+                panic("unexpected '\\n'. char pos: %i,%i", x, y);
+                printf("Board file len: %i,%i\n", board->len.x, board->len.y);
+            }else if(c == EOF){
+                fclose(board->file);
+                panic("unexpected EOF. char pos: %i,%i", x, y);
+                printf("Board file len: %i,%i\n", board->len.x, board->len.y);
+            }
+            board->tile[x][y] = tileUnpack(c);
+        }
+        if((c = fgetc(board->file)) != '\n'){
+            fclose(board->file);
+            panic("Expected newline at end of line %i\n", y);
         }
     }
+    if((c = fgetc(board->file)) != EOF){
+        fclose(board->file);
+        panic("Expected EOF at end of line %i\n", board->len.y);
+    }
+
+    return true;
 }
 
 #endif /* end of include guard: BOARD_H */
