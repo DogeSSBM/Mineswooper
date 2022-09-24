@@ -21,6 +21,13 @@ Board* boardPlaceBombs(Board *board, const Coord firstClick);
 uint adjTileState(const Board board, const Coord pos, const TileState state);
 uint floodFill(Board *board, const Coord pos);
 uint boardRemaining(const Board board);
+uint boardNumState(const Board board, const TileState state);
+Length boardFileLength(File *file);
+Tile tileUnpack(char c);
+char tilePack(const Tile tile);
+bool boardSave(Board *board);
+bool boardLoad(Board *board);
+
 
 // SOLVE_H
 uint flagAdj(Board *board, const Coord pos);
@@ -39,6 +46,10 @@ bool checkPlaceBombs(Board *board, const Coord pos, const Coord downPos);
 bool checkRestart(Board *board);
 bool checkClick(Board *board, const Coord pos, const Coord downPos);
 bool checkRight(Board *board, const Coord pos, const Coord downPos);
+bool checkCtrlKey(const Scancode key);
+uint boardUpdate(Board *board);
+bool checkBombNum(Board *board);
+bool checkSave(Board *board);
 uint boardUpdate(Board *board);
 
 // PRINT_H
@@ -46,6 +57,8 @@ void printBoard(const Board board);
 void printDecals(const Board board);
 void printDecalsPos(const Board board, const Coord pos);
 uint printCleared(const uint cleared);
+void printTilePacked(const char c);
+void printTile(const Tile tile);
 
 // DRAW_H
 uint tileScale(const Length win, const Length len);
