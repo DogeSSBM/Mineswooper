@@ -22,12 +22,13 @@ uint adjTileState(const Board board, const Coord pos, const TileState state);
 uint floodFill(Board *board, const Coord pos);
 uint boardRemaining(const Board board);
 uint boardNumState(const Board board, const TileState state);
+
+// SAVE_H
 Length boardFileLength(File *file);
 Tile tileUnpack(char c);
 char tilePack(const Tile tile);
 bool boardSave(Board *board);
 bool boardLoad(Board *board);
-
 
 // SOLVE_H
 bool clear121(Board *board, const Coord pos);
