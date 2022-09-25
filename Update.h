@@ -67,10 +67,10 @@ bool checkLen(Board* board)
 
 bool checkNewGame(Board *board, const Coord mid, const uint scale)
 {
-    const Rect rect = rectify(mid, iC(strlen(" New Game ")*scale, scale));
+    const Rect rect = rectify(mid, iC((strlen("New Game"))*scale, scale));
     if(
         mouseBtnReleased(MOUSE_L) &&
-        coordInRect(mouse.pos, rectOffset(rect, iC(-rect.w/2, -rect.h/2)))
+        coordInRect(mouse.pos, rectOffset(rect, coordDiv(iC(rect.w, rect.h), -2)))
     ){
         board->state = BS_NEW;
         if(!board->tile)
@@ -290,5 +290,30 @@ uint boardUpdate(Board *board)
     }
     return scale;
 }
+
+// uint boardUpdate(Board *board)
+// {
+//     const uint oldscale = board->scale;
+//     switch(board->state){
+//         case BS_NEW:
+//
+//             break;
+//         case BS_WIN:
+//
+//             break;
+//         case BS_MENU:
+//
+//             break;
+//         case BS_OPEN:
+//
+//             break;
+//         case BS_PLAY:
+//
+//             break;
+//         default:
+//
+//             break;
+//     }
+// }
 
 #endif /* end of include guard: UPDATE_H */

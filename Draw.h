@@ -25,6 +25,42 @@ void drawBoardBlank(const Length len, const uint scale, const Offset off)
     }
 }
 
+Coord drawMenuEntry(const char *text, const Coord point, const uint scale)
+{
+    const Length textlen = iC((strlen(text))*scale, scale);
+    setColor(BLACK);
+    fillRectCenteredCoordLength(point, coordAdd(textlen, 4));
+    setColor(GREY1);
+    fillRectCenteredCoordLength(point, textlen);
+    setColor(GREY2);
+    fillRectCenteredCoordLength(point, coordAdd(textlen, -4));
+
+    drawTextCenteredCoord(text, point);
+    return coordShift(point, DIR_D, scale+scale/2);
+}
+
+void drawMenu(const Board board, const uint scale, const Coord mid, const Offset off)
+{
+    drawBoardBlank(board.len, scale, off);
+    setTextColor(WHITE);
+
+    Coord point = drawMenuEntry("New Game", mid, scale);
+
+    char buf[256] = {0};
+    sprintf(buf, "Length: %i,%i", board.len.x, board.len.y);
+    point = drawMenuEntry(buf, point, scale);
+
+    sprintf(buf, "Mines: %u", board.numBombs);
+    point = drawMenuEntry(buf, point, scale);
+
+    sprintf(buf, "Solver: %s", BoardTypeStr[board.type]);
+    point = drawMenuEntry(buf, point, scale);
+
+    sprintf(buf, "Cheats: %s", board.cheat ? "Enabled" : "Disabled");
+    point = drawMenuEntry(buf, point, scale);
+
+}
+
 void drawBoard(const Board board, const uint scale)
 {
     static uint oldScale = 0;
@@ -123,16 +159,7 @@ void drawBoard(const Board board, const uint scale)
         if(board.tile == NULL)
             drawBoardBlank(board.len, scale, off);
 
-
-        setColor(GREY);
-        setTextColor(WHITE);
-        const Length textlen = iC(strlen(" New Game ")*scale, scale);
-        const Rect rect = rectify(
-            coordOffset(mid, coordDiv(textlen, -2)),
-            textlen
-        );
-        fillRectRect(rect);
-        drawTextCenteredCoord(" New Game ", mid);
+        drawMenu(board, scale, mid, off);
 
         if(board.state == BS_MENU){
 
