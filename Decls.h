@@ -48,7 +48,7 @@ Coord tileMousePos(const uint scale, const Offset boardOff, const Coord tpos);
 void checkQuit(Board *board);
 bool checkCheat(const bool cheat);
 bool checkLen(Board* board);
-bool checkNewGame(Board *board, const Coord mid, const uint scale);
+Coord checkNewGame(Board *board, const Coord point, const uint scale);
 bool checkPlaceBombs(Board *board, const Coord pos, const Coord downPos);
 bool checkRestart(Board *board);
 bool checkClick(Board *board, const Coord pos, const Coord downPos);
@@ -60,8 +60,7 @@ bool checkSave(Board *board);
 uint boardUpdate(Board *board);
 
 // PRINT_H
-void printBoard(const Board board);
-void printDecals(const Board board);
+void printBoard(const Board board, const bool decals);
 void printDecalsPos(const Board board, const Coord pos);
 uint printCleared(const uint cleared);
 void printTilePacked(const char c);

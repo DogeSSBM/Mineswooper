@@ -4,10 +4,10 @@
 void panic_helper(const char *func, const char *file, const int line, const char * format, ...)
 {
     fprintf(stderr, "Panic -\n");
-    fprintf(stderr, "\tFile: %s\n", file);
-    fprintf(stderr, "\tLine: %i\n", line);
-    fprintf(stderr, "\tFunc: %s\n", func);
-    fprintf(stderr, "\tMessage: \"");
+    fprintf(stderr, "File: %s\n", file);
+    fprintf(stderr, "Line: %i\n", line);
+    fprintf(stderr, "Func: %s\n", func);
+    fprintf(stderr, "Message: \"");
     va_list args;
     va_start(args, format);
     vfprintf(stderr, format, args);

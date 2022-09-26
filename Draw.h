@@ -45,13 +45,7 @@ void drawMenu(const Board board, const uint scale, const Coord mid, const Offset
     setTextColor(WHITE);
 
     Coord point = drawMenuEntry("New Game", mid, scale);
-
     char buf[256] = {0};
-    sprintf(buf, "Length: %i,%i", board.len.x, board.len.y);
-    point = drawMenuEntry(buf, point, scale);
-
-    sprintf(buf, "Mines: %u", board.numBombs);
-    point = drawMenuEntry(buf, point, scale);
 
     sprintf(buf, "Solver: %s", BoardTypeStr[board.type]);
     point = drawMenuEntry(buf, point, scale);
@@ -59,6 +53,11 @@ void drawMenu(const Board board, const uint scale, const Coord mid, const Offset
     sprintf(buf, "Cheats: %s", board.cheat ? "Enabled" : "Disabled");
     point = drawMenuEntry(buf, point, scale);
 
+    sprintf(buf, "Length: %i,%i", board.len.x, board.len.y);
+    point = drawMenuEntry(buf, point, scale);
+
+    sprintf(buf, "Mines: %u", board.numBombs);
+    point = drawMenuEntry(buf, point, scale);
 }
 
 void drawBoard(const Board board, const uint scale)
@@ -159,7 +158,7 @@ void drawBoard(const Board board, const uint scale)
         if(board.tile == NULL)
             drawBoardBlank(board.len, scale, off);
 
-        drawMenu(board, scale, mid, off);
+        drawMenu(board, scale, iC(mid.x, mid.y/2), off);
 
         if(board.state == BS_MENU){
 

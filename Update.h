@@ -65,9 +65,9 @@ bool checkLen(Board* board)
     return false;
 }
 
-bool checkNewGame(Board *board, const Coord mid, const uint scale)
+Coord checkNewGame(Board *board, const Coord point, const uint scale)
 {
-    const Rect rect = rectify(mid, iC((strlen("New Game"))*scale, scale));
+    const Rect rect = rectify(point, iC((strlen("New Game"))*scale, scale));
     if(
         mouseBtnReleased(MOUSE_L) &&
         coordInRect(mouse.pos, rectOffset(rect, coordDiv(iC(rect.w, rect.h), -2)))
@@ -75,9 +75,38 @@ bool checkNewGame(Board *board, const Coord mid, const uint scale)
         board->state = BS_NEW;
         if(!board->tile)
             *board = boardAlloc(*board);
-        return true;
+
+        printf("Starting new game!\n");
     }
-    return false;
+    return coordShift(point, DIR_D, scale+scale/2);
+}
+
+Coord checkSolver(Board *board, const Coord point, const uint scale)
+{
+    char buf[256] = {0};
+    sprintf(buf, "Solver: %s", BoardTypeStr[board->type]);
+    const Rect rect = rectify(point, iC((strlen(buf))*scale, scale));
+    if(
+        mouseBtnReleased(MOUSE_L) &&
+        coordInRect(mouse.pos, rectOffset(rect, coordDiv(iC(rect.w, rect.h), -2)))
+    ){
+        board->type = (board->type+1) % B_N;
+    }
+    return coordShift(point, DIR_D, scale+scale/2);
+}
+
+Coord checkCheats(Board *board, const Coord point, const uint scale)
+{
+    char buf[256] = {0};
+    sprintf(buf, "Cheats: %s", board->cheat ? "Enabled" : "Disabled");
+    const Rect rect = rectify(point, iC((strlen(buf))*scale, scale));
+    if(
+        mouseBtnReleased(MOUSE_L) &&
+        coordInRect(mouse.pos, rectOffset(rect, coordDiv(iC(rect.w, rect.h), -2)))
+    ){
+        board->cheat = !board->cheat;
+    }
+    return coordShift(point, DIR_D, scale+scale/2);
 }
 
 bool checkPlaceBombs(Board *board, const Coord pos, const Coord downPos)
@@ -221,8 +250,8 @@ uint boardUpdate(Board *board)
 
             if(checkBombNum(board))
                 printf("Setting numBombs: %u\n", board->numBombs);
-            if(checkNewGame(board, mid, scale))
-                printf("Starting new game!\n");
+            checkCheats(board, checkSolver(board, checkNewGame(board, iC(mid.x, mid.y/2), scale), scale), scale);
+
             break;
         case BS_OPEN:
             if(checkRestart(board)){
@@ -291,29 +320,56 @@ uint boardUpdate(Board *board)
     return scale;
 }
 
-// uint boardUpdate(Board *board)
-// {
-//     const uint oldscale = board->scale;
-//     switch(board->state){
-//         case BS_NEW:
-//
-//             break;
-//         case BS_WIN:
-//
-//             break;
-//         case BS_MENU:
-//
-//             break;
-//         case BS_OPEN:
-//
-//             break;
-//         case BS_PLAY:
-//
-//             break;
-//         default:
-//
-//             break;
-//     }
-// }
+uint boardUpdateMenu(Board *board)
+{
+    (void)board;
+    return 0;
+}
+
+bool boardUpdateWindow(const Length len, Length *win, Coord *mid, Coord *off, uint *scale)
+{
+    if(windowResized() || (scale == 0 && coordMax(len) > 0)){
+        *win = getWindowLen();
+        *mid = coordDiv(*win, 2);
+        *scale = tileScale(*win, len);
+        *off = tileOffset(*win, len, *scale);
+        return true;
+    }
+    return false;
+}
+
+uint boardUpdateNew(Board *board)
+{
+    checkQuit(board);
+
+    static Length win = {.x=-1,.y=-1};
+    static Coord mid = {.x=-1,.y=-1};
+    static Coord off = {.x=-1,.y=-1};
+    static uint scale = 0;
+    boardUpdateWindow(board->len, &win, &mid, &off, &scale);
+
+    switch(board->state){
+        case BS_NEW:
+
+            break;
+        case BS_WIN:
+
+            break;
+        case BS_MENU:
+
+            checkCheats(board, checkSolver(board, checkNewGame(board, iC(mid.x, mid.y/2), scale), scale), scale);
+            break;
+        case BS_OPEN:
+
+            break;
+        case BS_PLAY:
+
+            break;
+        default:
+
+            break;
+    }
+    return scale;
+}
 
 #endif /* end of include guard: UPDATE_H */

@@ -126,8 +126,8 @@ Board* boardPlaceBombs(Board *board, const Coord firstClick)
         floodFill(boardCalcNums(boardRngBombs(board)), board->lastClick);
     }while(board->type != B_RNG && !solvable(board));
     printf("%u tries\n", i);
-    printBoard(*board);
-    printDecals(*board);
+    printBoard(*board, false);
+    printBoard(*board, true);
     board = boardRestart(board);
     printf("cleared %u tiles\n", floodFill(board, board->lastClick));
     const uint left = boardRemaining(*board);
@@ -165,9 +165,9 @@ uint floodFill(Board *board, const Coord pos)
     if(!validTilePos(pos, board->len) || board->tile[pos.x][pos.y].state != S_TILE)
         return 0;
     if(board->tile[pos.x][pos.y].isBomb){
-        printBoard(*board);
+        printBoard(*board, false);
         printf("\n");
-        printDecals(*board);
+        printBoard(*board, true);
         printf("\n");
         printDecalsPos(*board, pos);
         panic("tried to prop bomb at %i,%i\n", pos.x, pos.y);
