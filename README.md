@@ -2,6 +2,19 @@
 A configurable implementation of minesweeper.
 
 # Config Options
+
+## Generation strategy
+
+These options can be used to guarantee only certain types of solvable boards are presented to the player.
+
+Passing `RNG`, `ADJ`, or `SAT` as an argument will change the method used to generate a board configuration.
+
+`./main.out RNG`: This will randomly generate a board and is the default.
+
+`./main.out ADJ`: This will generate a board that is solvable using basic adjacent reasoning. (The solver will concider only individual tiles and their 8 neighbors when attempting to find a suitable configuration.)
+
+`./main.out SAT`: This will generate a board that is solvable using `ADJ` reasoning as well as SAT solving strategies. (Mostly completed but still a work in progress.)
+
 ## Board Length
 Pass in two comma seperated numbers as an argument for a board with that length.
 
@@ -31,15 +44,6 @@ Will generate a board with 50 mines.
 By default 99 tiles will be mines.
 
 When on the "New Game" screen, scrolling the mouse wheel down/up will increase/decrease the number of mines.
-
-## Generation strategy
-Passing `RNG`, `ADJ`, or `SAT` as an argument will change the method used to generate a board configuration.
-
-`./main.out RNG`: This will randomly generate a board and is the default.
-
-`./main.out ADJ`: This will generate a board that is solvable using basic adjacent reasoning. (The solver will concider only individual tiles and their 8 neighbors when attempting to find a suitable configuration.)
-
-`./main.out SAT`: This will generate a board that is solvable using `ADJ` reasoning as well as SAT solving strategies. (Mostly completed but still a work in progress.)
 
 ## Cheats
 When on the "New Game" screen, you can toggle cheats by pressing the space bar.
