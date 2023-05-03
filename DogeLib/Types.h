@@ -46,6 +46,17 @@ typedef SDL_Scancode        Scancode;
 #define BLEND_ADD           SDL_BLENDMODE_ADD
 #define BLEND_MOD           SDL_BLENDMODE_MOD
 
+#define MOUSE_L             (SDL_BUTTON(SDL_BUTTON_LEFT))
+#define MOUSE_M             (SDL_BUTTON(SDL_BUTTON_MIDDLE))
+#define MOUSE_R             (SDL_BUTTON(SDL_BUTTON_RIGHT))
+#define MOUSE_F             (SDL_BUTTON(SDL_BUTTON_X1))
+#define MOUSE_B             (SDL_BUTTON(SDL_BUTTON_X2))
+
+#define MW_D                1u
+#define MW_R                (1u<<1)
+#define MW_U                (1u<<2)
+#define MW_L                (1u<<3)
+
 #define PI                  M_PI
 
 typedef enum{
@@ -74,10 +85,28 @@ typedef union{
     };
 }Coord, Range, Length, Offset, Ratio;
 
+typedef struct{
+    Color color;
+    uint numVertex;
+    Coord *vertex;
+}Poly;
+
 static inline
 Coord iC(const int x, const int y)
 {
     return (const Coord){.x = x, .y = y};
+}
+
+static inline
+Coord irC(const Rect rect)
+{
+    return iC(rect.x, rect.y);
+}
+
+static inline
+Coord irL(const Rect rect)
+{
+    return iC(rect.w, rect.h);
 }
 
 typedef union{

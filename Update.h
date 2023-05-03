@@ -28,15 +28,6 @@ void checkQuit(Board *board)
     }
 }
 
-bool checkCheat(const bool cheat)
-{
-    if(keyReleased(SDL_SCANCODE_SPACE)){
-        printf("board->cheat = %s\n", !cheat?"true":"false");
-        return !cheat;
-    }
-    return cheat;
-}
-
 bool checkLen(Board* board)
 {
     const Scancode arowkey[4] = {
@@ -123,22 +114,6 @@ bool checkPlaceBombs(Board *board, const Coord pos, const Coord downPos)
     return false;
 }
 
-bool checkRestart(Board *board)
-{
-    if(keyReleased(SDL_SCANCODE_T)){
-        *board = boardReset(*board);
-        return true;
-    }
-    if(keyReleased(SDL_SCANCODE_R)){
-        if(keyState(SDL_SCANCODE_LCTRL) || keyState(SDL_SCANCODE_RCTRL))
-            *board = boardReset(*board);
-        else
-            board = boardRestart(board);
-        return true;
-    }
-    return false;
-}
-
 bool checkClick(Board *board, const Coord pos, const Coord downPos)
 {
     if(
@@ -202,13 +177,6 @@ bool checkBombNum(Board *board)
     return false;
 }
 
-bool checkSave(Board *board)
-{
-    if(checkCtrlKey(SDL_SCANCODE_S))
-        return boardSave(board);
-    return false;
-}
-
 uint boardUpdate(Board *board)
 {
     static Coord down[2] = {0};
@@ -238,9 +206,10 @@ uint boardUpdate(Board *board)
                 board->state = BS_OPEN;
                 break;
             }
-            if(checkSave(board))
+            if(checkCtrlKey(SDL_SCANCODE_S)){
+                boardSave(board);
                 printf("Saved board\n");
-            board->cheat = checkCheat(board->cheat);
+            }
             if(checkLen(board) || windowResized()){
                 win = getWindowLen();
                 mid = coordDiv(win, 2);
@@ -253,12 +222,7 @@ uint boardUpdate(Board *board)
             checkCheats(board, checkSolver(board, checkNewGame(board, iC(mid.x, mid.y/2), scale), scale), scale);
 
             break;
-        case BS_OPEN:
-            if(checkRestart(board)){
-                board->state = BS_PLAY;
-                break;
-            }
-
+        case BS_OPEN:;
             const int prvLvl = board->lvl;
             board->lvl = imax(0, board->lvl-keyPressed(SDL_SCANCODE_MINUS)) + keyPressed(SDL_SCANCODE_EQUALS);
             if(prvLvl != board->lvl)
@@ -291,12 +255,14 @@ uint boardUpdate(Board *board)
                 board->state = BS_MENU;
                 break;
             }
-
-            if(checkSave(board))
-                printf("Saved board\n");
-
-            if(checkRestart(board))
-                printf("Fresh board\n");
+            if(keyPressed(SDL_SCANCODE_T)){
+                *board = boardReset(*board);
+                printf("Reset tiles.\n");
+            }
+            if(checkCtrlKey(SDL_SCANCODE_R)){
+                board = boardRestart(board);
+                printf("Restarting.\n");
+            }
 
             uint left = 0;
             if(printCleared(checkClick(board, pos, down[0]))){

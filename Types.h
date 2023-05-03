@@ -78,4 +78,13 @@ typedef enum{
     A_N
 }ArgType;
 
+typedef enum{E_TEXT, E_CHOICE, E_VALUE, E_N}EntryType;
+
+typedef struct{
+    EntryType type;
+    uint val;
+    char *text;
+    Texture *texture;
+}Entry;
+
 #endif /* end of include guard: TYPES_H */

@@ -41,6 +41,13 @@ Coord drawMenuEntry(const char *text, const Coord point, const uint scale)
 
 void drawMenu(const Board board, const uint scale, const Coord mid, const Offset off)
 {
+    // static Entry menu[5] = {
+    //     (const Entry){},
+    //     (const Entry){},
+    //     (const Entry){},
+    //     (const Entry){},
+    //     (const Entry){},
+    // }
     drawBoardBlank(board.len, scale, off);
     setTextColor(WHITE);
 

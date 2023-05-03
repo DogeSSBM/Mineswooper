@@ -1,4 +1,5 @@
-#pragma once
+#ifndef COORDS_H
+#define COORDS_H
 
 Direction dirROR(const Direction dir)
 {
@@ -76,7 +77,7 @@ int clamp(const int n, const int min, const int max)
 
 bool inBound(const int n, const int min, const int max)
 {
-    return n >= min && n < max;
+    return !(n < min || n >= max);
 }
 
 bool inRange(const int n, const Range range)
@@ -84,13 +85,13 @@ bool inRange(const int n, const Range range)
     return n >= range.min && n < range.max;
 }
 
-int wrap(const int n, const int a, const int b)
+int wrap(const int n, const int min, const int max)
 {
-    const uint size = iabs(a-b);
-    if(n < imin(a, b))
-        return imax(a,b)-iabs(n%size);
-    if(n >= imax(a, b))
-        return imin(a,b)+iabs(n%size);
+    const uint size = max-min;
+    if(n < min)
+        return max-abs(n);
+    if(n >= max)
+        return min+(n%size);
     return n;
 }
 
@@ -126,34 +127,6 @@ Rect coordsToRect(const Coord coord1, const Coord coord2)
         .w = coord2.x - coord1.x,
         .h = coord2.y - coord1.y
     };
-}
-
-// returns rect at pos with length len
-Rect rectify(const Coord pos, const Length len)
-{
-    return (const Rect){
-        .x = pos.x,
-        .y = pos.y,
-        .w = len.x,
-        .h = len.y
-    };
-}
-
-// Returns true if coord is in rect
-bool coordInRect(const Coord coord, const Rect rect)
-{
-    return inBound(coord.x, rect.x, rect.x+rect.w) && inBound(coord.y, rect.y, rect.y+rect.h);
-}
-
-// returns index of first rect that coord can be found in or -1 if in none
-int coordInRectArr(const Coord coord, Rect *const rect, const int num)
-{
-    if(num < 1)
-        return -1;
-    for(int i = 0; i < num; i++)
-        if(coordInRect(coord, rect[i]))
-            return i;
-    return -1;
 }
 
 bool coordNz(const Coord coord)
@@ -193,7 +166,7 @@ Coord coordSub(const Coord coord1, const Coord coord2)
 
 float coordfDist(const Coordf coord1, const Coordf coord2)
 {
-    return sqrt(powf(coord2.x-coord1.x,2.0f)+powf(coord2.y-coord1.y,2.0f));
+    return sqrtf(powf(coord2.x-coord1.x,2.0f)+powf(coord2.y-coord1.y,2.0f));
 }
 
 Coordf coordfDiv(const Coordf coord, const float num)
@@ -275,8 +248,57 @@ Coord coordCenter(const Coord coord, const Length len)
     return coordOffset(coord, coordDiv(len, 2));
 }
 
+// offsets the coord by -1/2 the length
+Coord coordUncenter(const Coord coord, const Length len)
+{
+    return coordOffset(coord, coordDiv(len, -2));
+}
+
+// returns rect at pos with length len
+Rect rectify(const Coord pos, const Length len)
+{
+    return (const Rect){
+        .x = pos.x,
+        .y = pos.y,
+        .w = len.x,
+        .h = len.y
+    };
+}
+
+// offsets rect pos by 1/2 its length
+Rect rectCenter(Rect r)
+{
+    const Length len = irL(r);
+    return rectify(coordCenter(irC(r), len), len);
+}
+
+// returns rect pos offset by len of rect
+Length unrectify(const Rect rect)
+{
+    return coordOffset(irC(rect), irL(rect));
+}
+
+// Returns true if coord is in rect
+bool coordInRect(const Coord coord, const Rect rect)
+{
+    return inBound(coord.x, rect.x, rect.x+rect.w) && inBound(coord.y, rect.y, rect.y+rect.h);
+}
+
+// returns index of first rect that coord can be found in or -1 if in none
+int coordInRectArr(const Coord coord, Rect *const rect, const int num)
+{
+    if(num < 1)
+        return -1;
+    for(int i = 0; i < num; i++)
+        if(coordInRect(coord, rect[i]))
+            return i;
+    return -1;
+}
+
 Rect rectOffset(const Rect rect, const Offset off)
 {
     const Coord pos = coordOffset((const Coord){.x = rect.x, .y = rect.y}, off);
     return (Rect){.x = pos.x, .y = pos.y, .w = rect.w, .h = rect.h};
 }
+
+#endif /* end of include guard: COORDS_H */

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef IMAGE_H
+#define IMAGE_H
 
 void img_quit(void)
 {
@@ -17,12 +18,21 @@ void img_init(void)
     atexit(img_quit);
 }
 
+static inline
 void freeImg(Img *image)
 {
-    if(image != NULL)
+    if(image)
         SDL_FreeSurface(image);
 }
 
+static inline
+void freeTexture(Texture *t)
+{
+    if(t)
+        SDL_DestroyTexture(t);
+}
+
+static inline
 Img* loadImg(const char *imgFile)
 {
     Img *surface = IMG_Load(imgFile);
@@ -34,6 +44,15 @@ Img* loadImg(const char *imgFile)
     return surface;
 }
 
+static inline
+Texture* imgTexture(Img *img)
+{
+    Texture *t = SDL_CreateTextureFromSurface(gfx.renderer, img);
+    freeImg(img);
+    return t;
+}
+
+static inline
 Texture* loadTexture(const char *imgFile)
 {
     Img *img = IMG_Load(imgFile);
@@ -42,6 +61,7 @@ Texture* loadTexture(const char *imgFile)
     return t;
 }
 
+static inline
 void drawImg(Img *image)
 {
     Texture *t = SDL_CreateTextureFromSurface(gfx.renderer, image);
@@ -49,6 +69,7 @@ void drawImg(Img *image)
     SDL_DestroyTexture(t);
 }
 
+static inline
 void loadDrawImg(const char *imgFile)
 {
     Img *img = IMG_Load(imgFile);
@@ -63,6 +84,7 @@ void loadDrawImg(const char *imgFile)
     SDL_FreeSurface(img);
 }
 
+static inline
 Length textureLen(Texture *texture)
 {
     Length len = {0};
@@ -70,7 +92,14 @@ Length textureLen(Texture *texture)
     return len;
 }
 
-void drawTexture(Texture *texture, const int x, const int y)
+static inline
+Rect textureRect(Texture *texture, const Coord pos)
+{
+    return rectify(pos, textureLen(texture));
+}
+
+static inline
+Length drawTexture(Texture *texture, const int x, const int y)
 {
     const Length len = textureLen(texture);
     SDL_RenderCopy(
@@ -79,14 +108,17 @@ void drawTexture(Texture *texture, const int x, const int y)
         &(const Rect){.w = len.x, .h = len.y},
         &(const Rect){.x = x, .y = y, .w = len.x, .h = len.y}
     );
+    return len;
 }
 
-void drawTextureCoord(Texture *texture, const Coord pos)
+static inline
+Length drawTextureCoord(Texture *texture, const Coord pos)
 {
-    drawTexture(texture, pos.x, pos.y);
+    return drawTexture(texture, pos.x, pos.y);
 }
 
-void drawTextureCentered(Texture *texture, const int x, const int y)
+static inline
+Length drawTextureCentered(Texture *texture, const int x, const int y)
 {
     const Length len = textureLen(texture);
     SDL_RenderCopy(
@@ -95,14 +127,17 @@ void drawTextureCentered(Texture *texture, const int x, const int y)
         &(const Rect){.w = len.x, .h = len.y},
         &(const Rect){.x = x - len.x/2, .y = y - len.y/2, .w = len.x, .h = len.y}
     );
+    return len;
 }
 
-void drawTextureCenteredCoord(Texture *texture, const Coord pos)
+static inline
+Length drawTextureCenteredCoord(Texture *texture, const Coord pos)
 {
-    drawTextureCentered(texture, pos.x, pos.y);
+    return drawTextureCentered(texture, pos.x, pos.y);
 }
 
-void drawTextureResize(Texture *texture, const int x, const int y, const int xlen, const int ylen)
+static inline
+Length drawTextureResize(Texture *texture, const int x, const int y, const int xlen, const int ylen)
 {
     const Length len = textureLen(texture);
     SDL_RenderCopy(
@@ -111,14 +146,17 @@ void drawTextureResize(Texture *texture, const int x, const int y, const int xle
         &(const Rect){.w = len.x, .h = len.y},
         &(const Rect){.x = x, .y = y, .w = xlen, .h = ylen}
     );
+    return len;
 }
 
-void drawTextureCoordResize(Texture *texture, const Coord pos, const Length len)
+static inline
+Length drawTextureCoordResize(Texture *texture, const Coord pos, const Length len)
 {
-    drawTextureResize(texture, pos.x, pos.y, len.x, len.y);
+    return drawTextureResize(texture, pos.x, pos.y, len.x, len.y);
 }
 
-void drawTextureCenteredResize(Texture *texture, const int x, const int y, const int xlen, const int ylen)
+static inline
+Length drawTextureCenteredResize(Texture *texture, const int x, const int y, const int xlen, const int ylen)
 {
     const Length len = textureLen(texture);
     SDL_RenderCopy(
@@ -127,9 +165,13 @@ void drawTextureCenteredResize(Texture *texture, const int x, const int y, const
         &(const Rect){.w = len.x, .h = len.y},
         &(const Rect){.x = x - xlen/2, .y = y - ylen/2, .w = xlen, .h = ylen}
     );
+    return len;
 }
 
-void drawTextureCenteredCoordResize(Texture *texture, const Coord pos, const Length len)
+static inline
+Length drawTextureCenteredCoordResize(Texture *texture, const Coord pos, const Length len)
 {
-    drawTextureCenteredResize(texture, pos.x, pos.y, len.x, len.y);
+    return drawTextureCenteredResize(texture, pos.x, pos.y, len.x, len.y);
 }
+
+#endif /* end of include guard: IMAGE_H */
