@@ -177,8 +177,8 @@ void drawBoard(const Board board, const uint scale)
             }
         }
     }
-    setTextColor(CYAN);
-    drawTextCenteredCoord(BoardStateStr[board.state], coordMul(iC(3,3),scale));
+    // setTextColor(CYAN);
+    // drawTextCenteredCoord(BoardStateStr[board.state], coordMul(iC(3,3),scale));
 }
 
 #endif /* end of include guard: DRAW_H */
