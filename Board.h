@@ -204,6 +204,10 @@ uint floodCoord(Board *board, const Coord pos)
                 validTilePos(adj, board->len) &&
                 board->tile[adj.x][adj.y].state == S_TILE
             ){
+                if(board->tile[adj.x][adj.y].isBomb){
+                    board->state = BS_MENU;
+                    return 0;
+                }
                 count += floodFill(board, adj);
             }
         }
