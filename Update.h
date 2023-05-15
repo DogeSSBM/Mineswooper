@@ -117,22 +117,40 @@ bool checkPlaceBombs(Board *board, const Coord pos, const Coord downPos)
 bool checkClick(Board *board, const Coord pos, const Coord downPos)
 {
     if(
-        mouseBtnReleased(MOUSE_L) &&
         validTilePos(pos, board->len) &&
         validTilePos(downPos, board->len) &&
-        coordSame(downPos, pos) &&
-        !mouseBtnState(MOUSE_R)
+        coordSame(downPos, pos)
     ){
-        printf(
-            "MOUSE_L -\n\tpos: (%i,%i)\n\tmpos: (%i,%i)\n",
-            pos.x, pos.y, mouse.pos.x, mouse.pos.y
-        );
-        board->lastClick = pos;
-        if(board->tile[pos.x][pos.y].isBomb){
-            board->state = BS_MENU;
-            return 0;
+        if(mouseBtnReleased(MOUSE_L) && !mouseBtnState(MOUSE_R)){
+            printf(
+                "MOUSE_L -\n\tpos: (%i,%i)\n\tmpos: (%i,%i)\n",
+                pos.x, pos.y, mouse.pos.x, mouse.pos.y
+            );
+            if(board->tile[pos.x][pos.y].state == S_NUM)
+                board->lastClickTick = getTicks();
+            board->lastClick = pos;
+            if(board->tile[pos.x][pos.y].isBomb){
+                board->state = BS_MENU;
+                return 0;
+            }
+            return floodFill(board, pos);
         }
-        return floodFill(board, pos);
+        if(
+            (
+                (mouseBtnPressed(MOUSE_L) && getTicks()-board->lastClickTick < 400) ||
+                (mouseBtnState(MOUSE_L) && mouseBtnPressed(MOUSE_R))
+            ) &&
+            board->tile[pos.x][pos.y].state == S_NUM &&
+            board->tile[pos.x][pos.y].num == adjTileState(*board, pos, S_FLAG)
+        ){
+            printf(
+                "Chord -\n\tpos: (%i,%i)\n\tmpos: (%i,%i)\n",
+                pos.x, pos.y, mouse.pos.x, mouse.pos.y
+            );
+            board->lastClick = pos;
+
+            return floodCoord(board, pos);
+        }
     }
     return 0;
 }

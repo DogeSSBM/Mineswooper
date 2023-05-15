@@ -3,7 +3,6 @@
 
 bool clear121(Board *board, const Coord pos)
 {
-
     for(uint i = 0; i < 2; i++){
         const Coord a = coordShift(pos, i,  1);
         const Coord b = coordShift(pos, dirINV(i), 1);

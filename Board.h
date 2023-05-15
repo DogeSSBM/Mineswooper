@@ -193,6 +193,24 @@ uint floodFill(Board *board, const Coord pos)
     return cleared;
 }
 
+uint floodCoord(Board *board, const Coord pos)
+{
+    uint count = 0;
+    for(int yo = -1; yo <= 1; yo++){
+        for(int xo = -1; xo <= 1; xo++){
+            const Coord adj = {.x = pos.x+xo, .y = pos.y+yo};
+            if(
+                !coordSame(pos, adj) &&
+                validTilePos(adj, board->len) &&
+                board->tile[adj.x][adj.y].state == S_TILE
+            ){
+                count += floodFill(board, adj);
+            }
+        }
+    }
+    return count;
+}
+
 uint boardRemaining(const Board board)
 {
     uint total = 0;

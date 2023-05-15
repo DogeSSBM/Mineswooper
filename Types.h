@@ -62,6 +62,7 @@ typedef struct{
     Length len;
     uint numBombs;
     bool cheat;
+    uint lastClickTick;
     Coord lastClick;
     BoardState state;
     BoardType type;
