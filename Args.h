@@ -79,7 +79,8 @@ Board boardArgs(int argc, char **argv)
         .lastClick = iC(-1,-1),
         .len = iC(30, 16),
         .numBombs = 99,
-        .state = BS_MENU
+        .state = BS_MENU,
+        .type = B_SAT
     };
 
     bool lenDone = false;

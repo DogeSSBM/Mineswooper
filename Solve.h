@@ -226,9 +226,4 @@ bool solvable(Board *board)
     return solve(board, true);
 }
 
-void hint(Board *board)
-{
-
-}
-
 #endif /* end of include guard: SOLVE_H */
