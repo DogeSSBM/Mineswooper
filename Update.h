@@ -127,6 +127,8 @@ bool checkClick(Board *board, const Coord pos, const Coord downPos)
                 pos.x, pos.y, mouse.pos.x, mouse.pos.y
             );
             if(board->tile[pos.x][pos.y].isBomb){
+                printf("bomb\n");
+                exit(0);
                 board->state = BS_MENU;
                 return 0;
             }
