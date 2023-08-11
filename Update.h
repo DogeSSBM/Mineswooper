@@ -126,13 +126,13 @@ bool checkClick(Board *board, const Coord pos, const Coord downPos)
                 "MOUSE_L -\n\tpos: (%i,%i)\n\tmpos: (%i,%i)\n",
                 pos.x, pos.y, mouse.pos.x, mouse.pos.y
             );
-            if(board->tile[pos.x][pos.y].state == S_NUM)
-                board->lastClickTick = getTicks();
-            board->lastClick = pos;
             if(board->tile[pos.x][pos.y].isBomb){
                 board->state = BS_MENU;
                 return 0;
             }
+            if(board->tile[pos.x][pos.y].state == S_NUM)
+                board->lastClickTick = getTicks();
+            board->lastClick = pos;
             return floodFill(board, pos);
         }
         if(
@@ -291,6 +291,8 @@ uint boardUpdate(Board *board)
                     break;
                 }
             }
+            if(board->state != BS_PLAY)
+                break;
 
             if(checkRight(board, pos, down[1]))
                 printf(
