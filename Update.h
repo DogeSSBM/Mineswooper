@@ -291,6 +291,8 @@ uint boardUpdate(Board *board)
                     break;
                 }
             }
+            if(board->state == BS_MENU)
+                printf("Exiting to main menu\n");
             if(board->state != BS_PLAY)
                 break;
 
