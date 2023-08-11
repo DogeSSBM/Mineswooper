@@ -188,7 +188,7 @@ bool satSolve(Board *board)
     return false;
 }
 
-bool solve(Board *board, const bool patterns)
+bool solve(Board *board)
 {
     bool progress;
     do{
@@ -205,7 +205,7 @@ bool solve(Board *board, const bool patterns)
                     if(adjTileState(*board, pos, S_FLAG) == board->tile[x][y].num)
                         progress |= clearAdj(board, pos);
 
-                    if(patterns && board->tile[x][y].num == 2)
+                    if(board->type == B_SAT && board->tile[x][y].num == 2)
                         progress |= clear121(board, pos);
 
                 }
@@ -216,14 +216,6 @@ bool solve(Board *board, const bool patterns)
     }while(progress);
 
     return !boardRemaining(*board);
-}
-
-bool solvable(Board *board)
-{
-    if(board->type == B_ADJ)
-        return solve(board, false);
-
-    return solve(board, true);
 }
 
 #endif /* end of include guard: SOLVE_H */

@@ -117,6 +117,7 @@ Board* boardPlaceBombs(Board *board, const Coord firstClick)
             board->lastClick = coordShift(board->lastClick, dirINV(d), 1);
 
     uint i = 0;
+    uint ticks = getTicks();
     do{
         if(i > 10000000)
             panic(">10000000");
@@ -124,8 +125,10 @@ Board* boardPlaceBombs(Board *board, const Coord firstClick)
         if((i-1)/100 != i/100)
             printf("try: %u\n", i);
         floodFill(boardCalcNums(boardRngBombs(board)), board->lastClick);
-    }while(board->type != B_RNG && !solvable(board));
+    }while(board->type != B_RNG && !solve(board));
+    ticks = getTicks()-ticks;
     printf("%u tries\n", i);
+    printf("In %isec\n", ticks/1000);
     printBoard(*board, false);
     printBoard(*board, true);
     board = boardRestart(board);

@@ -39,8 +39,7 @@ Board* resetQuests(Board *board);
 bool isAbsurd(Board *board);
 bool reductioAdAbsurdum(Board *board);
 bool satSolve(Board *board);
-bool solve(Board *board, const bool patterns);
-bool solvable(Board *board);
+bool solve(Board *board);
 
 // UPDATE_H
 Coord mouseTilePos(const uint scale, const Offset boardOff);
